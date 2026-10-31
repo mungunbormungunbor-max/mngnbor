@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env*.local
+.env.development
+.env.production
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# misc
+.DS_Store
+Thumbs.db
+*.pem
+coverage/
+.vercel
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# allow committing the env template
+!.env.example
