@@ -36,12 +36,21 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 * Each item can be marked done with one tap.  
 * Shows a friendly empty state when nothing is planned, with a link to `plan-editor`.  
 * Designed so the installed home-screen icon opens directly to this page.
+* Added (owner request): time-of-day greeting; progress bar ("2 of 5 done"); **Now / Next** badge on the
+  current or upcoming item and amber time on missed items (refreshes every minute); haptic tap on supported phones.
+* Effects: staggered fade-in, check "pop", animated strike-through, smooth progress fill, confetti +
+  "All done for today!" banner when everything is checked. All motion respects the phone's reduce-motion setting.
+* "Edit" button in the header opens `plan-editor` for today.
 
 ### **`plan-editor`**
 
 * Form to add a plan item: title, optional time, optional note.  
 * List of the selected day's items with edit, delete, and reorder.  
 * Defaults to today; receives the date when opened from `plan-calendar`.
+* Time editing (owner request): change or clear an item's time directly in the list; items re-sort by time.
+
+> Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
+> `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
 ### **`plan-calendar`**
 

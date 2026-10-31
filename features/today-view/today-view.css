@@ -1,0 +1,125 @@
+/* Motion for today-view. Everything is disabled under prefers-reduced-motion. */
+
+@keyframes today-view-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes today-view-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes today-view-confetti {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), 110vh, 0) rotate(var(--spin));
+  }
+}
+
+@keyframes today-view-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.9);
+  }
+  15%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.95);
+  }
+}
+
+@keyframes today-view-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.today-view-rise {
+  animation: today-view-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.today-view-pop {
+  animation: today-view-pop 320ms ease-out;
+}
+
+/* Strike-through that draws from left to right. */
+.today-view-strike {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 55%;
+  background-size: 0% 2px;
+  transition:
+    background-size 300ms ease-out,
+    color 300ms ease-out;
+}
+
+.today-view-strike-on {
+  background-size: 100% 2px;
+}
+
+.today-view-progress-fill {
+  transition: width 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.today-view-pulse {
+  animation: today-view-pulse 2s ease-in-out infinite;
+}
+
+.today-view-confetti-piece {
+  position: absolute;
+  top: -16px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  animation: today-view-confetti var(--dur) cubic-bezier(0.25, 0.6, 0.4, 1) var(--delay) both;
+}
+
+.today-view-banner {
+  animation: today-view-banner 2600ms ease-in-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-view-rise,
+  .today-view-pop,
+  .today-view-pulse,
+  .today-view-confetti-piece {
+    animation: none;
+  }
+  .today-view-confetti-piece {
+    display: none;
+  }
+  .today-view-strike,
+  .today-view-progress-fill {
+    transition: none;
+  }
+  .today-view-banner {
+    animation: none;
+    transform: translate(-50%, 0);
+  }
+}
