@@ -48,6 +48,12 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 * List of the selected day's items with edit, delete, and reorder.  
 * Defaults to today; receives the date when opened from `plan-calendar`.
 * Time editing (owner request): change or clear an item's time directly in the list; items re-sort by time.
+* More (owner request): smart quick-add (type "Gym at 7pm" and the time is detected); quick time chips
+  (Morning / Noon / Afternoon / Evening / In 1 hour); title suggestions from recent items; "N unfinished from
+  yesterday — Bring over" banner; per-item ⋯ menu (Duplicate, Move to tomorrow, Delete) with undo; same-time
+  warning; "Clear done" with undo.
+* Effects: list rows slide to their new position when re-sorted, form shakes on an empty submit, menu/banner
+  pop-in, flash on changed rows, haptics. All motion respects the reduce-motion setting.
 
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).

@@ -5,37 +5,58 @@ import { useEffect, useRef, useState } from "react";
 import type { PlanEditorDraft, PlanEditorItem } from "./types";
 import {
   cleanPlanEditorDraft,
+  dismissPlanEditorCarry,
+  findPlanEditorTimeConflicts,
+  isPlanEditorCarryDismissed,
   loadPlanEditorItems,
+  loadRecentPlanEditorTitles,
+  loadUnfinishedFromPreviousDay,
   newPlanEditorId,
   nextPlanEditorSortOrder,
   parsePlanEditorDateKey,
   planEditorDateFromKey,
   savePlanEditorItems,
+  shiftPlanEditorDateKey,
   splitPlanEditorItems,
   toPlanEditorDateKey,
 } from "./plan-editor-data";
 import { PlanEditorForm } from "./plan-editor-form";
 import { PlanEditorItemRow } from "./plan-editor-item-row";
+import { usePlanEditorFlip } from "./use-plan-editor-flip";
 import "./plan-editor.css";
 
 const UNDO_MS = 5000;
 
 type Loaded = { dateKey: string; isToday: boolean; items: PlanEditorItem[] };
-type Undo = { item: PlanEditorItem; n: number };
+
+type UndoAction =
+  | { kind: "delete"; item: PlanEditorItem }
+  | { kind: "tomorrow"; item: PlanEditorItem; tomorrowKey: string; copyId: string }
+  | { kind: "clear"; items: PlanEditorItem[] };
+
+type Undo = { message: string; action: UndoAction; n: number };
 
 export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
   const [plan, setPlan] = useState<Loaded | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [flash, setFlash] = useState<{ id: string; n: number }>({ id: "", n: 0 });
   const [undo, setUndo] = useState<Undo | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [carry, setCarry] = useState<PlanEditorItem[]>([]);
   const undoCounter = useRef(0);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // The date (and "today") depends on the phone's clock, so resolve it on the client.
   useEffect(() => {
     const todayKey = toPlanEditorDateKey(new Date());
     const dateKey = parsePlanEditorDateKey(dateParam) ?? todayKey;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only date/localStorage read
+    /* eslint-disable react-hooks/set-state-in-effect -- client-only date/localStorage reads */
     setPlan({ dateKey, isToday: dateKey === todayKey, items: loadPlanEditorItems(dateKey) });
+    setSuggestions(loadRecentPlanEditorTitles(dateKey));
+    setCarry(
+      dateKey >= todayKey && !isPlanEditorCarryDismissed(dateKey) ? loadUnfinishedFromPreviousDay(dateKey) : [],
+    );
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [dateParam]);
 
   useEffect(() => {
@@ -51,6 +72,11 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     if (flashId) setFlash((f) => ({ id: flashId, n: f.n + 1 }));
   }
 
+  function offerUndo(message: string, action: UndoAction) {
+    undoCounter.current += 1;
+    setUndo({ message, action, n: undoCounter.current });
+  }
+
   function addItem(draft: PlanEditorDraft) {
     if (!plan) return;
     const clean = cleanPlanEditorDraft(draft);
@@ -61,6 +87,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
       isDone: false,
       sortOrder: nextPlanEditorSortOrder(plan.items),
     };
+    navigator.vibrate?.(10);
     commit([...plan.items, item], item.id);
   }
 
@@ -88,20 +115,87 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     );
   }
 
+  function duplicateItem(id: string) {
+    if (!plan) return;
+    const item = plan.items.find((it) => it.id === id);
+    if (!item) return;
+    const copy: PlanEditorItem = {
+      ...item,
+      id: newPlanEditorId(),
+      isDone: false,
+      sortOrder: nextPlanEditorSortOrder(plan.items),
+    };
+    navigator.vibrate?.(10);
+    commit([...plan.items, copy], copy.id);
+  }
+
   function deleteItem(id: string) {
     if (!plan) return;
     const item = plan.items.find((it) => it.id === id);
     if (!item) return;
+    navigator.vibrate?.(15);
     commit(plan.items.filter((it) => it.id !== id));
     if (editingId === id) setEditingId(null);
-    undoCounter.current += 1;
-    setUndo({ item, n: undoCounter.current });
+    offerUndo(`Deleted “${item.title}”`, { kind: "delete", item });
   }
 
-  function undoDelete() {
+  function moveToTomorrow(id: string) {
+    if (!plan) return;
+    const item = plan.items.find((it) => it.id === id);
+    if (!item) return;
+    const tomorrowKey = shiftPlanEditorDateKey(plan.dateKey, 1);
+    const tomorrowItems = loadPlanEditorItems(tomorrowKey);
+    const copy: PlanEditorItem = {
+      ...item,
+      id: newPlanEditorId(),
+      isDone: false,
+      sortOrder: nextPlanEditorSortOrder(tomorrowItems),
+    };
+    savePlanEditorItems(tomorrowKey, [...tomorrowItems, copy]);
+    navigator.vibrate?.(15);
+    commit(plan.items.filter((it) => it.id !== id));
+    if (editingId === id) setEditingId(null);
+    offerUndo(`Moved “${item.title}” to tomorrow`, { kind: "tomorrow", item, tomorrowKey, copyId: copy.id });
+  }
+
+  function clearDone() {
+    if (!plan) return;
+    const done = plan.items.filter((it) => it.isDone);
+    if (done.length === 0) return;
+    navigator.vibrate?.(15);
+    commit(plan.items.filter((it) => !it.isDone));
+    offerUndo(`Cleared ${done.length} done ${done.length === 1 ? "item" : "items"}`, { kind: "clear", items: done });
+  }
+
+  function runUndo() {
     if (!plan || !undo) return;
-    commit([...plan.items, undo.item], undo.item.id);
+    const a = undo.action;
+    if (a.kind === "delete") {
+      commit([...plan.items, a.item], a.item.id);
+    } else if (a.kind === "tomorrow") {
+      const tomorrow = loadPlanEditorItems(a.tomorrowKey).filter((it) => it.id !== a.copyId);
+      savePlanEditorItems(a.tomorrowKey, tomorrow);
+      commit([...plan.items, a.item], a.item.id);
+    } else {
+      commit([...plan.items, ...a.items]);
+    }
     setUndo(null);
+  }
+
+  function bringOverUnfinished() {
+    if (!plan || carry.length === 0) return;
+    let order = nextPlanEditorSortOrder(plan.items);
+    const copies = carry.map((it) => ({ ...it, id: newPlanEditorId(), isDone: false, sortOrder: order++ }));
+    navigator.vibrate?.(10);
+    dismissPlanEditorCarry(plan.dateKey);
+    setCarry([]);
+    commit([...plan.items, ...copies], copies[0].id);
+  }
+
+  function dismissCarry() {
+    if (!plan) return;
+    dismissPlanEditorCarry(plan.dateKey);
+    setCarry([]);
   }
 
   /** Swap an "anytime" item with its neighbour. */
@@ -118,7 +212,15 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     );
   }
 
-  const { scheduled, anytime } = plan ? splitPlanEditorItems(plan.items) : { scheduled: [], anytime: [] };
+  const items = plan?.items ?? [];
+  const { scheduled, anytime } = splitPlanEditorItems(items);
+  const conflicts = findPlanEditorTimeConflicts(items);
+  const doneCount = items.filter((it) => it.isDone).length;
+  const existingTitles = new Set(items.map((it) => it.title.trim().toLowerCase()));
+  const formSuggestions = suggestions.filter((s) => !existingTitles.has(s.toLowerCase()));
+
+  usePlanEditorFlip(listRef, [...scheduled, ...anytime].map((it) => `${it.id}:${it.startTime}:${it.sortOrder}`).join("|"));
+
   const dateLabel = plan
     ? planEditorDateFromKey(plan.dateKey).toLocaleDateString(undefined, {
         weekday: "long",
@@ -134,10 +236,13 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         item={item}
         isEditing={editingId === item.id}
         flashKey={flash.id === item.id ? flash.n : 0}
+        conflictWith={conflicts.get(item.id)}
         onStartEdit={() => setEditingId(item.id)}
         onCancelEdit={() => setEditingId(null)}
         onSave={(draft) => saveItem(item.id, draft)}
         onTimeChange={(t) => changeTime(item.id, t)}
+        onDuplicate={() => duplicateItem(item.id)}
+        onMoveToTomorrow={() => moveToTomorrow(item.id)}
         onDelete={() => deleteItem(item.id)}
         onMoveUp={reorder && reorder.index > 0 ? () => move(reorder.list, reorder.index, -1) : undefined}
         onMoveDown={
@@ -167,40 +272,81 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         </div>
       </header>
 
+      {carry.length > 0 && (
+        <div
+          role="region"
+          aria-label="Unfinished from yesterday"
+          className="plan-editor-banner mb-4 flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3"
+        >
+          <span aria-hidden className="text-2xl">
+            📋
+          </span>
+          <p className="min-w-0 flex-1 text-base font-medium">
+            {carry.length} unfinished from yesterday
+          </p>
+          <button
+            type="button"
+            onClick={bringOverUnfinished}
+            className="shrink-0 rounded-xl bg-foreground px-3 py-2 text-sm font-bold text-background active:opacity-80"
+          >
+            Bring over
+          </button>
+          <button
+            type="button"
+            onClick={dismissCarry}
+            aria-label="Dismiss"
+            className="shrink-0 rounded-full px-2 text-xl leading-none text-black/50 active:bg-black/5 dark:text-white/55"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <section aria-label="Add an item" className="mb-6 rounded-2xl bg-black/[0.03] p-3 dark:bg-white/[0.06]">
-        <PlanEditorForm submitLabel="Add to plan" onSubmit={addItem} resetOnSubmit />
+        <PlanEditorForm submitLabel="Add to plan" onSubmit={addItem} resetOnSubmit smart suggestions={formSuggestions} />
       </section>
 
-      {plan && plan.items.length === 0 && (
+      {plan && items.length === 0 && (
         <p className="plan-editor-enter py-8 text-center text-lg text-black/55 dark:text-white/55">
           No items yet. Add your first one above.
         </p>
       )}
 
-      {scheduled.length > 0 && (
-        <section className="mb-4">
-          <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
-            Scheduled
-          </h2>
-          <ul className="flex flex-col">{scheduled.map((item) => renderRow(item))}</ul>
-        </section>
-      )}
+      <div ref={listRef}>
+        {scheduled.length > 0 && (
+          <section className="mb-4">
+            <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
+              Scheduled
+            </h2>
+            <ul className="flex flex-col">{scheduled.map((item) => renderRow(item))}</ul>
+          </section>
+        )}
 
-      {anytime.length > 0 && (
-        <section>
-          <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
-            Anytime
-          </h2>
-          <ul className="flex flex-col">
-            {anytime.map((item, index) => renderRow(item, { index, list: anytime }))}
-          </ul>
-        </section>
-      )}
+        {anytime.length > 0 && (
+          <section>
+            <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
+              Anytime
+            </h2>
+            <ul className="flex flex-col">
+              {anytime.map((item, index) => renderRow(item, { index, list: anytime }))}
+            </ul>
+          </section>
+        )}
+      </div>
 
-      {plan && plan.items.length > 0 && (
-        <p className="mt-6 px-3 text-sm text-black/45 dark:text-white/45">
-          Tap an item to edit it. Tap a time to change it.
-        </p>
+      {items.length > 0 && (
+        <div className="mt-6 flex items-center justify-between gap-3 px-3">
+          <p className="text-sm text-black/45 dark:text-white/45">Tap an item to edit it. Tap a time to change it.</p>
+          {doneCount > 0 && (
+            <button
+              type="button"
+              onClick={clearDone}
+              className="shrink-0 rounded-full border border-black/15 px-3 py-1.5 text-sm font-semibold active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
+            >
+              Clear done ({doneCount})
+            </button>
+          )}
+        </div>
       )}
 
       {undo && (
@@ -209,10 +355,10 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
           role="status"
           className="plan-editor-toast fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md items-center justify-between gap-3 rounded-2xl bg-foreground py-2 pr-2 pl-4 text-background shadow-lg"
         >
-          <span className="truncate">Deleted “{undo.item.title}”</span>
+          <span className="truncate">{undo.message}</span>
           <button
             type="button"
-            onClick={undoDelete}
+            onClick={runUndo}
             className="shrink-0 rounded-xl px-4 py-2 font-bold text-emerald-400 active:bg-white/10 dark:text-emerald-700 dark:active:bg-black/10"
           >
             Undo

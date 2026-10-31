@@ -60,3 +60,80 @@
     animation: none;
   }
 }
+
+/* ---------- extra effects ---------- */
+
+@keyframes plan-editor-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes plan-editor-menu {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes plan-editor-banner {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.plan-editor-shake {
+  animation: plan-editor-shake 380ms ease-in-out;
+}
+
+.plan-editor-menu {
+  transform-origin: top right;
+  animation: plan-editor-menu 140ms ease-out both;
+}
+
+.plan-editor-banner {
+  animation: plan-editor-banner 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.plan-editor-chip {
+  transition:
+    background-color 150ms,
+    color 150ms,
+    transform 120ms;
+}
+.plan-editor-chip:active {
+  transform: scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-editor-shake,
+  .plan-editor-menu,
+  .plan-editor-banner {
+    animation: none;
+  }
+  .plan-editor-chip {
+    transition: none;
+  }
+}
