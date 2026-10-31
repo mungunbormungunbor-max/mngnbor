@@ -41,6 +41,10 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 * Effects: staggered fade-in, check "pop", animated strike-through, smooth progress fill, confetti +
   "All done for today!" banner when everything is checked. All motion respects the phone's reduce-motion setting.
 * "Edit" button in the header opens `plan-editor` for today.
+* More (owner request): "Next: <item> in 25 min" line; swipe an item right to complete it; 🔥 day streak;
+  "Hide done" toggle (remembered); remaining count in the tab title and on the installed app icon badge;
+  auto-scroll to the current item; time-of-day sky glow with a floating sun/moon; tap ripple; counting-up
+  percent; rotating celebration messages.
 
 ### **`plan-editor`**
 

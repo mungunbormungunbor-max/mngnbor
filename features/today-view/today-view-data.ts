@@ -90,6 +90,86 @@ export function getTodayViewGreeting(now: Date): string {
   return "Good evening";
 }
 
+/** One-line "what's next" summary under the date. Null when nothing timed is left. */
+export function getTodayViewNextUp(
+  sortedItems: TodayViewItem[],
+  statuses: Map<string, TodayViewItemStatus>,
+  now: Date,
+): { item: TodayViewItem; text: string; isNow: boolean } | null {
+  const item = sortedItems.find((it) => {
+    const s = statuses.get(it.id);
+    return s === "now" || s === "next";
+  });
+  if (!item?.startTime) return null;
+  const diff = minutesOf(item.startTime) - (now.getHours() * 60 + now.getMinutes());
+  if (diff <= 0) return { item, text: "happening now", isNow: true };
+  const h = Math.floor(diff / 60);
+  const m = diff % 60;
+  const text = h === 0 ? `in ${m} min` : m === 0 ? `in ${h} h` : `in ${h} h ${m} min`;
+  return { item, text, isNow: false };
+}
+
+/**
+ * Consecutive days (ending today or yesterday) on which every planned item was done.
+ * Today only counts once it's fully done, so an unfinished today doesn't break the streak.
+ */
+export function getTodayViewStreak(today: Date): number {
+  let streak = 0;
+  const day = new Date(today);
+  for (let i = 0; i < 366; i++) {
+    const items = loadTodayViewItems(toTodayViewDateKey(day));
+    const complete = items.length > 0 && items.every((it) => it.isDone);
+    if (complete) streak++;
+    else if (i > 0) break; // today unfinished: keep counting from yesterday
+    day.setDate(day.getDate() - 1);
+  }
+  return streak;
+}
+
+/* ---------- display preferences (today-view only) ---------- */
+
+const PREFS_KEY = "daily-plan:today-view-prefs";
+
+export type TodayViewPrefs = { hideDone: boolean };
+
+export function loadTodayViewPrefs(): TodayViewPrefs {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(PREFS_KEY) ?? "{}");
+    return { hideDone: parsed?.hideDone === true };
+  } catch {
+    return { hideDone: false };
+  }
+}
+
+export function saveTodayViewPrefs(prefs: TodayViewPrefs): void {
+  window.localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+}
+
+/* ---------- look & feel ---------- */
+
+export type TodayViewSky = { icon: string; glow: string };
+
+/** Header glow + icon that follow the time of day. */
+export function getTodayViewSky(now: Date): TodayViewSky {
+  const h = now.getHours();
+  if (h >= 5 && h < 8) return { icon: "🌅", glow: "from-orange-300/45 via-pink-300/25" };
+  if (h >= 8 && h < 17) return { icon: "☀️", glow: "from-sky-300/45 via-amber-200/25" };
+  if (h >= 17 && h < 20) return { icon: "🌇", glow: "from-orange-400/40 via-purple-400/25" };
+  return { icon: "🌙", glow: "from-indigo-500/40 via-violet-500/20" };
+}
+
+const CELEBRATION_MESSAGES = [
+  "All done for today! 🎉",
+  "Clean sweep! ✨",
+  "Nailed it! 🙌",
+  "Day conquered! 🏆",
+  "Nothing left. Enjoy! 🌈",
+];
+
+export function pickTodayViewCelebration(): string {
+  return CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+}
+
 /** "07:00" -> "7:00 AM" in the user's locale. */
 export function formatTodayViewTime(startTime: string): string {
   const [h, m] = startTime.split(":").map(Number);

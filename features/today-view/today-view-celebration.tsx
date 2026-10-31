@@ -15,7 +15,7 @@ function rand(seed: number): number {
 /** Confetti burst + "All done!" banner. The parent unmounts it after CELEBRATION_MS. */
 export const CELEBRATION_MS = 2800;
 
-export function TodayViewCelebration() {
+export function TodayViewCelebration({ message }: { message: string }) {
   return (
     <div aria-live="polite" className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
       {Array.from({ length: PIECES }, (_, i) => (
@@ -37,7 +37,7 @@ export function TodayViewCelebration() {
       <div
         className={`today-view-banner absolute top-[max(1.5rem,env(safe-area-inset-top))] left-1/2 rounded-full bg-emerald-600 px-6 py-3 text-lg font-bold whitespace-nowrap text-white shadow-lg`}
       >
-        All done for today! 🎉
+        {message}
       </div>
     </div>
   );

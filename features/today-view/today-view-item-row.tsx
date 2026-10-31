@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import type { TodayViewItem } from "./types";
 import { formatTodayViewTime, type TodayViewItemStatus } from "./today-view-data";
 import "./today-view.css";
@@ -18,34 +18,137 @@ const BADGE: Record<"now" | "next", { label: string; className: string }> = {
   next: { label: "Next", className: "bg-black/10 text-black/80 dark:bg-white/15 dark:text-white/85" },
 };
 
+/** How far (px) a swipe must travel to toggle the item. */
+const SWIPE_TRIGGER = 90;
+const SWIPE_MAX = 140;
+
+type Ripple = { id: number; x: number; y: number };
+
 export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
   const [popping, setPopping] = useState(false);
+  const [dx, setDx] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+  const gesture = useRef<{ x: number; y: number; swiping: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const rippleId = useRef(0);
   const highlighted = status === "now" || status === "next";
 
-  function handleTap() {
+  function toggle() {
     if (!item.isDone) {
       setPopping(true);
-      // Short haptic tick on phones that support it.
       navigator.vibrate?.(12);
     }
     onToggle(item.id);
   }
 
+  function onPointerDown(e: PointerEvent<HTMLButtonElement>) {
+    gesture.current = { x: e.clientX, y: e.clientY, swiping: false };
+    const rect = e.currentTarget.getBoundingClientRect();
+    rippleId.current += 1;
+    const ripple = { id: rippleId.current, x: e.clientX - rect.left, y: e.clientY - rect.top };
+    setRipples((r) => [...r, ripple]);
+  }
+
+  function onPointerMove(e: PointerEvent<HTMLButtonElement>) {
+    const g = gesture.current;
+    if (!g) return;
+    const moveX = e.clientX - g.x;
+    const moveY = e.clientY - g.y;
+    if (!g.swiping) {
+      if (moveX > 10 && Math.abs(moveX) > Math.abs(moveY) * 1.5) {
+        g.swiping = true;
+        setDragging(true);
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } else if (Math.abs(moveY) > 10 || moveX < -10) {
+        gesture.current = null; // vertical scroll or left swipe: not ours
+        return;
+      } else {
+        return;
+      }
+    }
+    // Rubber-band past the trigger point.
+    const x = moveX <= SWIPE_TRIGGER ? moveX : SWIPE_TRIGGER + (moveX - SWIPE_TRIGGER) * 0.35;
+    setDx(Math.max(0, Math.min(SWIPE_MAX, x)));
+  }
+
+  function endGesture() {
+    const g = gesture.current;
+    gesture.current = null;
+    setDragging(false);
+    if (g?.swiping) {
+      suppressClick.current = true;
+      if (dx >= SWIPE_TRIGGER) toggle();
+    }
+    setDx(0);
+  }
+
+  function onClick() {
+    if (suppressClick.current) {
+      suppressClick.current = false;
+      return;
+    }
+    toggle();
+  }
+
+  const revealProgress = Math.min(1, dx / SWIPE_TRIGGER);
+
   return (
-    <li className="today-view-rise" style={{ animationDelay: `${index * 55}ms` } as CSSProperties}>
+    <li
+      data-item-id={item.id}
+      className="today-view-rise relative"
+      style={{ animationDelay: `${index * 55}ms` } as CSSProperties}
+    >
+      {dx > 0 && (
+        <div
+          aria-hidden
+          className={`absolute inset-0 flex items-center rounded-2xl px-5 text-lg font-bold text-white ${
+            item.isDone ? "bg-slate-500" : "bg-emerald-600"
+          }`}
+          style={{ opacity: 0.35 + revealProgress * 0.65 }}
+        >
+          <span style={{ transform: `scale(${0.8 + revealProgress * 0.3})` }}>
+            {item.isDone ? "↺ Undo" : "✓ Done"}
+          </span>
+        </div>
+      )}
+
       <button
         type="button"
         role="checkbox"
         aria-checked={item.isDone}
-        onClick={handleTap}
-        className={`flex w-full items-center gap-4 rounded-2xl px-3 py-3 text-left transition-colors active:scale-[0.99] active:bg-black/5 dark:active:bg-white/10 ${
-          highlighted && status === "now" ? "bg-emerald-500/10 ring-1 ring-emerald-600/30" : ""
+        onClick={onClick}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endGesture}
+        onPointerCancel={endGesture}
+        data-dragging={dragging}
+        style={{ transform: dx ? `translateX(${dx}px)` : undefined }}
+        className={`today-view-swipe relative flex w-full items-center gap-4 overflow-hidden rounded-2xl px-3 py-3 text-left select-none ${
+          dx > 0
+            ? "bg-background shadow-md"
+            : status === "now"
+              ? "bg-emerald-500/10 ring-1 ring-emerald-600/30"
+              : ""
         }`}
       >
+        <span aria-hidden className="pointer-events-none absolute inset-0 text-emerald-600">
+          {ripples.map((r) => (
+            <span
+              key={r.id}
+              className="today-view-ripple"
+              style={{ left: r.x, top: r.y }}
+              onAnimationEnd={() => setRipples((all) => all.filter((x) => x.id !== r.id))}
+            />
+          ))}
+        </span>
+
         <span
           aria-hidden
-          onAnimationEnd={() => setPopping(false)}
-          className={`flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+          onAnimationEnd={(e) => {
+            if (e.animationName.includes("pop")) setPopping(false);
+          }}
+          className={`relative flex size-8 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
             popping ? "today-view-pop" : ""
           } ${
             item.isDone
@@ -60,7 +163,7 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
           )}
         </span>
 
-        <span className="min-w-0 flex-1">
+        <span className="relative min-w-0 flex-1">
           <span className="block truncate">
             <span
               className={`text-xl font-semibold today-view-strike ${
@@ -76,10 +179,10 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
         </span>
 
         {item.startTime && (
-          <span className="flex shrink-0 flex-col items-end gap-1">
+          <span className="relative flex shrink-0 flex-col items-end gap-1">
             {highlighted && (
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
+                className={`rounded-full px-2 py-0.5 text-xs font-bold tracking-wide uppercase ${
                   BADGE[status].className
                 } ${status === "now" ? "today-view-pulse" : ""}`}
               >
