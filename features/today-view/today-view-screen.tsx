@@ -4,14 +4,20 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { TodayViewItem } from "./types";
 import {
+  computeTodayViewDayPoints,
   getTodayViewGreeting,
+  getTodayViewLevel,
   getTodayViewNextUp,
   getTodayViewSky,
   getTodayViewStatuses,
   getTodayViewStreak,
+  getTodayViewStreakBonus,
+  hasTodayViewDayPoints,
   loadTodayViewItems,
   loadTodayViewPrefs,
+  loadTodayViewTotalPoints,
   pickTodayViewCelebration,
+  saveTodayViewDayPoints,
   saveTodayViewItems,
   saveTodayViewPrefs,
   sortTodayViewItems,
@@ -33,18 +39,29 @@ export function TodayViewScreen() {
   const [prefs, setPrefs] = useState<TodayViewPrefs>({ hideDone: false });
   const [streak, setStreak] = useState(0);
   const [celebration, setCelebration] = useState<string | null>(null);
+  const [points, setPoints] = useState(0);
+  const [gain, setGain] = useState<{ n: number; amount: number; bonus: number } | null>(null);
   const scrolledRef = useRef(false);
 
   useEffect(() => {
     function refresh() {
       const date = new Date();
       const dateKey = toTodayViewDateKey(date);
+      const currentStreak = getTodayViewStreak(date);
       setNow(date);
       // Reload items only when the day changed (e.g. app reopened after midnight).
       setPlan((prev) =>
         prev?.dateKey === dateKey ? prev : { dateKey, items: loadTodayViewItems(dateKey) },
       );
-      setStreak(getTodayViewStreak(date));
+      setStreak(currentStreak);
+      // Items ticked before points existed still count: record today once if nothing is saved yet.
+      if (!hasTodayViewDayPoints(dateKey)) {
+        saveTodayViewDayPoints(
+          dateKey,
+          computeTodayViewDayPoints(loadTodayViewItems(dateKey), currentStreak),
+        );
+      }
+      setPoints(loadTodayViewTotalPoints());
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only prefs read
     setPrefs(loadTodayViewPrefs());
@@ -62,6 +79,12 @@ export function TodayViewScreen() {
   }, []);
 
   useEffect(() => {
+    if (!gain) return;
+    const t = window.setTimeout(() => setGain(null), 1500);
+    return () => window.clearTimeout(t);
+  }, [gain]);
+
+  useEffect(() => {
     if (!celebration) return;
     const t = window.setTimeout(() => setCelebration(null), CELEBRATION_MS);
     return () => window.clearTimeout(t);
@@ -73,8 +96,24 @@ export function TodayViewScreen() {
     const items = plan.items.map((it) => (it.id === id ? { ...it, isDone: !it.isDone } : it));
     saveTodayViewItems(plan.dateKey, items);
     setPlan({ ...plan, items });
-    if (now) setStreak(getTodayViewStreak(now));
-    if (!wasAllDone && items.every((it) => it.isDone)) {
+    const newStreak = now ? getTodayViewStreak(now) : streak;
+    setStreak(newStreak);
+
+    // Points for today are recomputed from the items, so un-ticking takes them back.
+    const before = loadTodayViewTotalPoints();
+    saveTodayViewDayPoints(plan.dateKey, computeTodayViewDayPoints(items, newStreak));
+    const after = loadTodayViewTotalPoints();
+    setPoints(after);
+
+    const finishedDay = !wasAllDone && items.every((it) => it.isDone);
+    if (after > before) {
+      setGain((g) => ({
+        n: (g?.n ?? 0) + 1,
+        amount: after - before,
+        bonus: finishedDay ? getTodayViewStreakBonus(newStreak) : 0,
+      }));
+    }
+    if (finishedDay) {
       setCelebration(pickTodayViewCelebration());
       navigator.vibrate?.([20, 60, 20]);
     }
@@ -93,7 +132,11 @@ export function TodayViewScreen() {
   const remaining = sorted.length - doneCount;
   const percent = sorted.length ? Math.round((doneCount / sorted.length) * 100) : 0;
   const shownPercent = useTodayViewCountUp(percent);
+  const shownPoints = useTodayViewCountUp(points, 600);
+  const level = getTodayViewLevel(points);
   const allDone = sorted.length > 0 && remaining === 0;
+  // If today is unfinished the streak counts from yesterday, so finishing today adds one more day.
+  const bonusToday = getTodayViewStreakBonus(allDone ? streak : streak + 1);
   const visible = prefs.hideDone ? sorted.filter((it) => !it.isDone) : sorted;
   const sky = now ? getTodayViewSky(now) : null;
 
@@ -170,6 +213,44 @@ export function TodayViewScreen() {
                 </span>{" "}
                 {streak}-day streak
               </p>
+            )}
+          </div>
+        )}
+
+        {(points > 0 || sorted.length > 0) && (
+          <div
+            aria-label="Streak points"
+            className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-400/15 px-4 py-2.5"
+          >
+            <div className="min-w-0">
+              <p className="text-lg font-bold">
+                <span aria-hidden>⭐</span>{" "}
+                <span key={gain?.n ?? 0} className={`inline-block tabular-nums ${gain ? "today-view-points-bump" : ""}`}>
+                  {shownPoints}
+                </span>{" "}
+                pts <span className="text-sm font-medium text-black/55 dark:text-white/55">· {level.name}</span>
+              </p>
+              <p className="text-sm text-black/60 dark:text-white/60">
+                {allDone
+                  ? `Streak bonus earned: +${bonusToday}`
+                  : `Finish everything today for +${bonusToday} streak bonus`}
+              </p>
+            </div>
+            {level.next !== null && (
+              <p className="shrink-0 text-right text-sm font-medium text-black/55 dark:text-white/55">
+                {level.next - points} to
+                <br />
+                next rank
+              </p>
+            )}
+            {gain && (
+              <span
+                key={gain.n}
+                className="today-view-gain rounded-full bg-emerald-600 px-3 py-1 text-sm font-bold whitespace-nowrap text-white shadow"
+              >
+                +{gain.amount}
+                {gain.bonus > 0 && ` · streak bonus +${gain.bonus}`}
+              </span>
             )}
           </div>
         )}

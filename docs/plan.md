@@ -45,6 +45,9 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
   "Hide done" toggle (remembered); remaining count in the tab title and on the installed app icon badge;
   auto-scroll to the current item; time-of-day sky glow with a floating sun/moon; tap ripple; counting-up
   percent; rotating celebration messages.
+* Streak points (owner request): +10 points per completed item, plus a streak bonus of 5 x streak days when
+  the whole day is finished. Points are stored per day (`daily-plan:today-view-points:<date>`), so un-ticking
+  takes them back. Shows total points, a rank (Starter / Planner / Achiever / Pro / Legend) and a floating "+N".
 
 ### **`plan-editor`**
 

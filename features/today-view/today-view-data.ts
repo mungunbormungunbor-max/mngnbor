@@ -126,6 +126,65 @@ export function getTodayViewStreak(today: Date): number {
   return streak;
 }
 
+/* ---------- streak points ---------- */
+
+export const TODAY_VIEW_POINTS_PER_ITEM = 10;
+export const TODAY_VIEW_STREAK_BONUS = 5;
+
+const POINTS_PREFIX = "daily-plan:today-view-points:";
+
+/** Points a day is worth: 10 per done item, plus 5 x streak days when everything is done. */
+export function computeTodayViewDayPoints(items: TodayViewItem[], streak: number): number {
+  const done = items.filter((it) => it.isDone).length;
+  const allDone = items.length > 0 && done === items.length;
+  return done * TODAY_VIEW_POINTS_PER_ITEM + (allDone ? streak * TODAY_VIEW_STREAK_BONUS : 0);
+}
+
+/** Streak bonus alone, for the "+15 streak bonus" label. */
+export function getTodayViewStreakBonus(streak: number): number {
+  return streak * TODAY_VIEW_STREAK_BONUS;
+}
+
+/**
+ * Points are kept per day (not as a running total), so un-ticking an item takes its points back
+ * and toggling can't farm them. Deleting items in plan-editor doesn't erase points already earned.
+ */
+export function saveTodayViewDayPoints(dateKey: string, points: number): void {
+  if (points <= 0) window.localStorage.removeItem(POINTS_PREFIX + dateKey);
+  else window.localStorage.setItem(POINTS_PREFIX + dateKey, String(points));
+}
+
+export function hasTodayViewDayPoints(dateKey: string): boolean {
+  return window.localStorage.getItem(POINTS_PREFIX + dateKey) !== null;
+}
+
+export function loadTodayViewTotalPoints(): number {
+  let total = 0;
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (!key?.startsWith(POINTS_PREFIX)) continue;
+    const n = Number(window.localStorage.getItem(key));
+    if (Number.isFinite(n) && n > 0) total += n;
+  }
+  return total;
+}
+
+/** A small rank that gives the points something to work towards. */
+export function getTodayViewLevel(points: number): { name: string; next: number | null } {
+  const levels = [
+    { name: "Starter", min: 0 },
+    { name: "Planner", min: 100 },
+    { name: "Achiever", min: 300 },
+    { name: "Pro", min: 700 },
+    { name: "Legend", min: 1500 },
+  ];
+  let idx = 0;
+  levels.forEach((l, i) => {
+    if (points >= l.min) idx = i;
+  });
+  return { name: levels[idx].name, next: levels[idx + 1]?.min ?? null };
+}
+
 /* ---------- display preferences (today-view only) ---------- */
 
 const PREFS_KEY = "daily-plan:today-view-prefs";

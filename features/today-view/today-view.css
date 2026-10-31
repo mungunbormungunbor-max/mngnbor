@@ -214,3 +214,52 @@
     transition: none;
   }
 }
+
+/* ---------- streak points ---------- */
+
+@keyframes today-view-gain {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-34px) scale(1);
+  }
+}
+
+@keyframes today-view-points-bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+}
+
+.today-view-gain {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  pointer-events: none;
+  animation: today-view-gain 1300ms ease-out both;
+}
+
+.today-view-points-bump {
+  animation: today-view-points-bump 380ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-view-gain {
+    animation: none;
+    opacity: 0;
+  }
+  .today-view-points-bump {
+    animation: none;
+  }
+}
