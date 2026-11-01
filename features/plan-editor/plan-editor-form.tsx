@@ -29,6 +29,10 @@ const EMPTY: PlanEditorDraft = { title: "", startTime: "", note: "" };
 const inputClass =
   "w-full rounded-xl border border-black/15 bg-transparent px-3 py-3 text-lg outline-none transition-colors focus:border-brand-600 dark:border-white/20 dark:focus:border-brand-500";
 
+/** Smaller inputs for the secondary fields (time, note); `min-w-0` lets native pickers shrink to fit. */
+const compactInputClass =
+  "block h-11 w-full min-w-0 max-w-full rounded-xl border border-black/15 bg-transparent px-2.5 text-base outline-none transition-colors focus:border-brand-600 dark:border-white/20 dark:focus:border-brand-500";
+
 const chipClass =
   "plan-editor-chip shrink-0 rounded-full border px-3 py-1.5 text-sm font-semibold whitespace-nowrap";
 const chipOff = "border-black/15 dark:border-white/20";
@@ -138,24 +142,25 @@ export function PlanEditorForm({
         )}
       </div>
 
-      <div className="flex gap-3">
-        <label className="flex w-40 shrink-0 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          {t("editor.timeOptional")}
+      {/* Two columns that share the width (time narrower); stacked on very narrow phones. */}
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-black/60 dark:text-white/60">
+          <span className="truncate">{t("editor.timeOptional")}</span>
           <input
             type="time"
             value={draft.startTime}
             onChange={(e) => setDraft({ ...draft, startTime: e.target.value })}
-            className={`${inputClass} text-black dark:text-white`}
+            className={`${compactInputClass} text-black dark:text-white`}
           />
         </label>
-        <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          {t("editor.noteOptional")}
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-black/60 dark:text-white/60">
+          <span className="truncate">{t("editor.noteOptional")}</span>
           <input
             type="text"
             maxLength={200}
             value={draft.note}
             onChange={(e) => setDraft({ ...draft, note: e.target.value })}
-            className={`${inputClass} text-black dark:text-white`}
+            className={`${compactInputClass} text-black dark:text-white`}
           />
         </label>
       </div>

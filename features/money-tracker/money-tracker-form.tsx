@@ -24,6 +24,10 @@ type Props = {
 const inputClass =
   "w-full rounded-xl border border-black/15 bg-transparent px-3 py-3 text-lg outline-none transition-colors focus:border-brand-600 dark:border-white/20 dark:focus:border-brand-400";
 
+/** Smaller inputs for the secondary fields (date, note); `min-w-0` lets native pickers shrink to fit. */
+const compactInputClass =
+  "block h-11 w-full min-w-0 max-w-full rounded-xl border border-black/15 bg-transparent px-2.5 text-base outline-none transition-colors focus:border-brand-600 dark:border-white/20 dark:focus:border-brand-400";
+
 const KINDS: { kind: MoneyTrackerKind; label: "money.kindIncome" | "money.kindExpense" }[] = [
   { kind: "income", label: "money.kindIncome" },
   { kind: "expense", label: "money.kindExpense" },
@@ -137,24 +141,25 @@ export function MoneyTrackerForm({ entry, defaultDate, submitLabel, onSubmit, on
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <label className="flex w-44 shrink-0 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          {t("money.date")}
+      {/* Two columns that share the width (date narrower); stacked on very narrow phones. */}
+      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-black/60 dark:text-white/60">
+          <span className="truncate">{t("money.date")}</span>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className={`${inputClass} text-black dark:text-white`}
+            className={`${compactInputClass} text-black dark:text-white`}
           />
         </label>
-        <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          {t("money.note")}
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-black/60 dark:text-white/60">
+          <span className="truncate">{t("money.note")}</span>
           <input
             type="text"
             maxLength={120}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className={`${inputClass} text-black dark:text-white`}
+            className={`${compactInputClass} text-black dark:text-white`}
           />
         </label>
       </div>

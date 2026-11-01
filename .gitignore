@@ -38,3 +38,5 @@ coverage/
 
 # allow committing the env template
 !.env.example
+
+.vercel
