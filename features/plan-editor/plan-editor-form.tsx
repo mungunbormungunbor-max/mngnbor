@@ -190,10 +190,10 @@ export function PlanEditorForm({
         </button>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          className="flex-1 rounded-xl bg-brand-600 px-4 py-3 text-lg font-semibold text-white transition-opacity active:opacity-80"
+          className="min-w-[8rem] flex-1 rounded-xl bg-brand-600 px-4 py-3 text-lg font-semibold text-white transition-opacity active:opacity-80"
         >
           {submitLabel}
         </button>
@@ -201,7 +201,7 @@ export function PlanEditorForm({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-black/15 px-4 py-3 text-lg font-semibold dark:border-white/20"
+            className="shrink-0 rounded-xl border border-black/15 px-4 py-3 text-base font-semibold whitespace-nowrap dark:border-white/20"
           >
             {t("editor.cancel")}
           </button>

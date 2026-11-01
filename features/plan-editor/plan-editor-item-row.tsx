@@ -72,9 +72,10 @@ export function PlanEditorItemRow({
     <li data-flip-id={item.id} className={`plan-editor-enter relative ${menuOpen ? "z-30" : ""}`}>
       <div
         key={flashKey}
-        className={`flex items-center gap-2 rounded-2xl py-2 pr-1 pl-3 ${flashKey ? "plan-editor-flash" : ""}`}
+        // Wraps: on a narrow phone the time and buttons drop to their own line instead of squeezing the title.
+        className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-2xl py-2 pr-1 pl-3 ${flashKey ? "plan-editor-flash" : ""}`}
       >
-        <button type="button" onClick={onStartEdit} className="min-w-0 flex-1 py-1 text-left">
+        <button type="button" onClick={onStartEdit} className="min-w-[9rem] flex-1 py-1 text-left">
           <span
             className={`block truncate text-lg font-semibold ${
               item.isDone ? "text-black/40 line-through dark:text-white/40" : ""
@@ -92,6 +93,7 @@ export function PlanEditorItemRow({
           )}
         </button>
 
+        <div className="ml-auto flex shrink-0 items-center gap-1">
         <PlanEditorTimePill
           value={item.startTime}
           onChange={onTimeChange}
@@ -134,6 +136,7 @@ export function PlanEditorItemRow({
             ⋯
           </span>
         </button>
+        </div>
       </div>
 
       {menuOpen && (

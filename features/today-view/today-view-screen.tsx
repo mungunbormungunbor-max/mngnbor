@@ -229,7 +229,7 @@ export function TodayViewScreen() {
           <div className="mt-1 flex shrink-0 items-center gap-2">
             <Link
               href="/plan-editor"
-              className="rounded-full border border-black/15 px-4 py-2 text-base font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
+              className="rounded-full border border-black/15 px-4 py-2 text-base font-semibold whitespace-nowrap transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
             >
               {t("today.edit")}
             </Link>
@@ -310,17 +310,17 @@ export function TodayViewScreen() {
 
         {!viewed && sorted.length > 0 && (
           <div className="mt-3">
-            <div className="mb-1 flex items-center justify-between text-base text-black/60 dark:text-white/60">
-              <span>
+            <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-base text-black/60 dark:text-white/60">
+              <span className="min-w-0">
                 {allDone ? t("today.allDone") : t("today.progress", { done: doneCount, total: sorted.length })}
               </span>
-              <span className="flex items-center gap-3">
+              <span className="ml-auto flex shrink-0 items-center gap-3">
                 {doneCount > 0 && (
                   <button
                     type="button"
                     onClick={toggleHideDone}
                     aria-pressed={prefs.hideDone}
-                    className="rounded-full border border-black/15 px-3 py-0.5 text-sm font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
+                    className="rounded-full border border-black/15 px-3 py-1 text-sm font-semibold whitespace-nowrap transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
                   >
                     {prefs.hideDone ? t("today.showDone", { n: doneCount }) : t("today.hideDone")}
                   </button>
