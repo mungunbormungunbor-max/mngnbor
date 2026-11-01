@@ -78,6 +78,16 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
+### **`notifications`** (owner request)
+
+* Phone reminders for plan items that have a time. Turned on from the ☰ menu (asks the phone for permission),
+  with a choice of On time / 5 / 10 / 30 min before, and a "Send a test" button. Each reminder is sent once per
+  item and time; done items are skipped. Tapping a notification opens `today-view`.
+* Stage 1 limit: there is no server, so reminders only fire while the app is open or still alive in the
+  background. Reminders when the app is fully closed need web push (Stage 3, server). On iPhone, the app must be
+  added to the Home Screen first.
+* Files: `features/notifications/`, `public/sw.js` (service worker), a panel inside `components/app-menu.tsx`.
+
 ### **`plan-calendar`**
 
 * Month view with a marker on days that have plan items.  

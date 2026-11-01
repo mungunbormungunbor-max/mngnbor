@@ -130,6 +130,21 @@ const en = {
   "editor.duplicate": "Duplicate",
   "editor.moveToTomorrow": "Move to tomorrow",
   "editor.delete": "Delete",
+
+  "notif.title": "Notifications",
+  "notif.toggle": "Remind me about timed items",
+  "notif.when": "When to remind",
+  "notif.lead0": "On time",
+  "notif.lead5": "5 min before",
+  "notif.lead10": "10 min before",
+  "notif.lead30": "30 min before",
+  "notif.test": "Send a test",
+  "notif.testBody": "Notifications are working 🎉",
+  "notif.bodyNow": "Starting now · {time}",
+  "notif.bodySoon": "In {n} min · {time}",
+  "notif.unsupported": "This browser can't show notifications. On iPhone, add the app to your Home Screen first.",
+  "notif.denied": "Notifications are blocked. Allow them for this app in your phone's settings, then try again.",
+  "notif.note": "Reminders only ring while the app is open or still running in the background.",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -251,6 +266,21 @@ const mn: Record<MessageKey, string> = {
   "editor.duplicate": "Хувилах",
   "editor.moveToTomorrow": "Маргааш руу зөөх",
   "editor.delete": "Устгах",
+
+  "notif.title": "Мэдэгдэл",
+  "notif.toggle": "Цагтай зүйлсийг сануулах",
+  "notif.when": "Хэзээ сануулах",
+  "notif.lead0": "Яг цагт",
+  "notif.lead5": "5 минутын өмнө",
+  "notif.lead10": "10 минутын өмнө",
+  "notif.lead30": "30 минутын өмнө",
+  "notif.test": "Туршилт илгээх",
+  "notif.testBody": "Мэдэгдэл ажиллаж байна 🎉",
+  "notif.bodyNow": "Одоо эхэлнэ · {time}",
+  "notif.bodySoon": "{n} минутын дараа · {time}",
+  "notif.unsupported": "Энэ хөтөч мэдэгдэл харуулах боломжгүй. iPhone дээр эхлээд аппыг Үндсэн дэлгэцэнд нэмнэ үү.",
+  "notif.denied": "Мэдэгдэл хаалттай байна. Утасныхаа тохиргооноос энэ аппад зөвшөөрөөд дахин оролдоно уу.",
+  "notif.note": "Сануулга зөвхөн апп нээлттэй эсвэл арын горимд ажиллаж байх үед дуугарна.",
 };
 
 export const MESSAGES: Record<Language, Record<MessageKey, string>> = { en, mn };

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NotificationsScheduler } from "@/features/notifications";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { getServerLanguage } from "@/lib/i18n/server";
 import "./globals.css";
@@ -38,7 +39,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <I18nProvider initialLang={lang}>{children}</I18nProvider>
+        <I18nProvider initialLang={lang}>
+          {children}
+          <NotificationsScheduler />
+        </I18nProvider>
       </body>
     </html>
   );
