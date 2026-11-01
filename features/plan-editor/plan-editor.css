@@ -24,7 +24,7 @@
 
 @keyframes plan-editor-flash {
   0% {
-    background-color: rgb(16 185 129 / 0.22);
+    background-color: rgb(132 103 245 / 0.22);
   }
   100% {
     background-color: transparent;

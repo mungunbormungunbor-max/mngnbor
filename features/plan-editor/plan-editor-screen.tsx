@@ -294,7 +294,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
           <button
             type="button"
             onClick={bringOverUnfinished}
-            className="shrink-0 rounded-xl bg-foreground px-3 py-2 text-sm font-bold text-background active:opacity-80"
+            className="shrink-0 rounded-xl bg-brand-600 px-3 py-2 text-sm font-bold text-white active:opacity-80"
           >
             {t("editor.bringOver")}
           </button>
@@ -360,13 +360,13 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         <div
           key={undo.n}
           role="status"
-          className="plan-editor-toast fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md items-center justify-between gap-3 rounded-2xl bg-foreground py-2 pr-2 pl-4 text-background shadow-lg"
+          className="plan-editor-toast fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md items-center justify-between gap-3 rounded-2xl bg-brand-700 py-2 pr-2 pl-4 text-white shadow-lg"
         >
           <span className="truncate">{undo.message}</span>
           <button
             type="button"
             onClick={runUndo}
-            className="shrink-0 rounded-xl px-4 py-2 font-bold text-emerald-400 active:bg-white/10 dark:text-emerald-700 dark:active:bg-black/10"
+            className="shrink-0 rounded-xl px-4 py-2 font-bold text-amber-200 active:bg-white/10"
           >
             {t("editor.undo")}
           </button>

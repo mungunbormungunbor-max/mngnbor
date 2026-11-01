@@ -63,7 +63,7 @@ export function AppMenu({ className = "" }: { className?: string }) {
             >
               {LANGUAGE_NAMES[code]}
               {lang === code && (
-                <svg viewBox="0 0 20 20" className="size-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth={3}>
+                <svg viewBox="0 0 20 20" className="size-5 text-brand-600 dark:text-brand-300" fill="none" stroke="currentColor" strokeWidth={3}>
                   <path d="M4 10.5l4 4 8-9" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}

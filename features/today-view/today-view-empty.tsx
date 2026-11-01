@@ -15,7 +15,7 @@ export function TodayViewEmpty() {
       <p className="max-w-64 text-lg text-black/60 dark:text-white/60">{t("today.empty.text")}</p>
       <Link
         href="/plan-editor"
-        className="mt-2 rounded-full bg-foreground px-6 py-3 text-lg font-semibold text-background"
+        className="mt-2 rounded-full bg-brand-600 px-6 py-3 text-lg font-semibold text-white"
       >
         {t("today.empty.button")}
       </Link>

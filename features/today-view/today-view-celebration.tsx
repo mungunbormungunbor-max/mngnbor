@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import "./today-view.css";
 
-const COLORS = ["#10b981", "#f59e0b", "#3b82f6", "#ef4444", "#a855f7", "#ec4899"];
+const COLORS = ["#8467f5", "#ff7eb6", "#f59e0b", "#38bdf8", "#6d4ae0", "#fb7185"];
 const PIECES = 36;
 
 /** Deterministic pseudo-random in [0, 1) so renders are stable. */
@@ -35,7 +35,7 @@ export function TodayViewCelebration({ message }: { message: string }) {
         />
       ))}
       <div
-        className={`today-view-banner absolute top-[max(1.5rem,env(safe-area-inset-top))] left-1/2 rounded-full bg-emerald-600 px-6 py-3 text-lg font-bold whitespace-nowrap text-white shadow-lg`}
+        className={`today-view-banner absolute top-[max(1.5rem,env(safe-area-inset-top))] left-1/2 rounded-full bg-brand-600 px-6 py-3 text-lg font-bold whitespace-nowrap text-white shadow-lg`}
       >
         {message}
       </div>

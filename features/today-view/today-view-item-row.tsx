@@ -17,7 +17,7 @@ type Props = {
 };
 
 const BADGE: Record<"now" | "next", { label: "today.badge.now" | "today.badge.next"; className: string }> = {
-  now: { label: "today.badge.now", className: "bg-emerald-600 text-white" },
+  now: { label: "today.badge.now", className: "bg-brand-600 text-white" },
   next: { label: "today.badge.next", className: "bg-black/10 text-black/80 dark:bg-white/15 dark:text-white/85" },
 };
 
@@ -107,7 +107,7 @@ export function TodayViewItemRow({ item, status, index, onToggle, readOnly = fal
         <div
           aria-hidden
           className={`absolute inset-0 flex items-center rounded-2xl px-5 text-lg font-bold text-white ${
-            item.isDone ? "bg-slate-500" : "bg-emerald-600"
+            item.isDone ? "bg-slate-500" : "bg-brand-600"
           }`}
           style={{ opacity: 0.35 + revealProgress * 0.65 }}
         >
@@ -133,11 +133,11 @@ export function TodayViewItemRow({ item, status, index, onToggle, readOnly = fal
           dx > 0
             ? "bg-background shadow-md"
             : status === "now"
-              ? "bg-emerald-500/10 ring-1 ring-emerald-600/30"
+              ? "bg-brand-500/10 ring-1 ring-brand-600/30"
               : ""
         }`}
       >
-        <span aria-hidden className="pointer-events-none absolute inset-0 text-emerald-600">
+        <span aria-hidden className="pointer-events-none absolute inset-0 text-brand-500">
           {ripples.map((r) => (
             <span
               key={r.id}
@@ -157,7 +157,7 @@ export function TodayViewItemRow({ item, status, index, onToggle, readOnly = fal
             popping ? "today-view-pop" : ""
           } ${
             item.isDone
-              ? "border-emerald-600 bg-emerald-600 text-white"
+              ? "border-brand-600 bg-brand-600 text-white"
               : "border-black/30 dark:border-white/40"
           }`}
         >

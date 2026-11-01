@@ -41,9 +41,9 @@ export function TodayViewWeek({ days, selectedKey, todayKey, onSelect, onShiftWe
               onClick={() => onSelect(dateKey)}
               className={`flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0 py-2 transition-colors ${
                 selected
-                  ? "bg-foreground text-background"
+                  ? "bg-brand-600 text-white"
                   : isToday
-                    ? "ring-1 ring-emerald-600/60 active:bg-black/5 dark:active:bg-white/10"
+                    ? "ring-1 ring-brand-600/60 active:bg-black/5 dark:active:bg-white/10"
                     : "active:bg-black/5 dark:active:bg-white/10"
               }`}
             >
@@ -54,7 +54,7 @@ export function TodayViewWeek({ days, selectedKey, todayKey, onSelect, onShiftWe
               <span
                 aria-hidden
                 className={`size-1.5 rounded-full ${
-                  !hasItems ? "bg-transparent" : allDone ? "bg-emerald-500" : selected ? "bg-background/70" : "bg-black/35 dark:bg-white/40"
+                  !hasItems ? "bg-transparent" : allDone ? "bg-pink-500" : selected ? "bg-white/70" : "bg-black/35 dark:bg-white/40"
                 }`}
               />
             </button>

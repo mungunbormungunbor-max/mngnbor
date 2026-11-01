@@ -56,7 +56,7 @@ export function PlanEditorItemRow({
 
   if (isEditing) {
     return (
-      <li data-flip-id={item.id} className="plan-editor-enter rounded-2xl border border-emerald-600/40 p-3">
+      <li data-flip-id={item.id} className="plan-editor-enter rounded-2xl border border-brand-600/40 p-3">
         <PlanEditorForm
           autoFocus
           submitLabel={t("editor.save")}

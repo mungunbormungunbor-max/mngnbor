@@ -91,7 +91,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 rounded-lg bg-foreground px-4 py-3 text-base font-semibold text-background disabled:opacity-50"
+          className="mt-2 rounded-lg bg-brand-600 px-4 py-3 text-base font-semibold text-white disabled:opacity-50"
         >
           {pending ? t("auth.pending") : t(`auth.${mode}.button`)}
         </button>

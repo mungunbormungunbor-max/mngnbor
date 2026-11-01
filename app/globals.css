@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * Color scheme: "Twilight" — a violet brand colour with a pink accent on a soft lavender canvas
+ * (deep indigo at night). Use `brand-*` for actions and progress; `pink-*` as the warm accent.
+ * Gold (amber) is kept for points and orange for the streak flame, so they still read as rewards.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f7ff;
+  --foreground: #1d1840;
+  --glow-a: rgb(132 103 245 / 0.16);
+  --glow-b: rgb(255 126 182 / 0.13);
 }
 
 @theme inline {
@@ -10,17 +17,52 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-brand-50: #f4f2ff;
+  --color-brand-100: #ebe7ff;
+  --color-brand-200: #d9d2ff;
+  --color-brand-300: #bfb2ff;
+  --color-brand-400: #a08cff;
+  --color-brand-500: #8467f5;
+  --color-brand-600: #6d4ae0;
+  --color-brand-700: #5a3bc2;
+  --color-brand-800: #4a329c;
+  --color-brand-900: #3b2a78;
+  --color-brand-950: #231a4a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0e0b1f;
+    --foreground: #efedff;
+    --glow-a: rgb(132 103 245 / 0.28);
+    --glow-b: rgb(255 126 182 / 0.12);
   }
 }
 
+html {
+  color-scheme: light dark;
+  accent-color: var(--color-brand-600);
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
+  /* Two soft colour washes in the corners, fixed so they don't scroll with the list. */
+  background-image:
+    radial-gradient(48rem 26rem at 0% -8%, var(--glow-a), transparent 70%),
+    radial-gradient(40rem 24rem at 100% 0%, var(--glow-b), transparent 70%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--color-brand-300);
+  color: var(--color-brand-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
 }

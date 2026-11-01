@@ -58,6 +58,10 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
   their text to `messages.ts` in both languages. `plan-editor` is translated too (menu in its header). `app-settings`
   can later reuse the same language option. Smart quick-add still recognises English "at 7pm" and 24h "19:00".
 
+* Color scheme "Twilight" (owner request, whole app): violet `brand-*` scale + pink accent on a lavender canvas (deep
+  indigo in dark mode), defined once in `app/globals.css`. Gold stays for points, orange for the streak flame.
+  App icons, manifest and browser theme color match.
+
 ### **`plan-editor`**
 
 * Form to add a plan item: title, optional time, optional note.  

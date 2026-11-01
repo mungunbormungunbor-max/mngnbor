@@ -215,7 +215,9 @@ export function TodayViewScreen() {
                 : " "}
             </p>
             <h1 className="flex items-center gap-2 text-4xl font-bold tracking-tight">
-              {now ? now.toLocaleDateString(locale, { month: "long", day: "numeric" }) : t("today.title")}
+              <span className="bg-gradient-to-r from-brand-600 to-pink-500 bg-clip-text text-transparent dark:from-brand-300 dark:to-pink-300">
+                {now ? now.toLocaleDateString(locale, { month: "long", day: "numeric" }) : t("today.title")}
+              </span>
               {sky && (
                 <span aria-hidden className="today-view-float text-3xl">
                   {sky.icon}
@@ -242,7 +244,7 @@ export function TodayViewScreen() {
                   {nextUp.isNow ? t("today.now") : t("today.next")}
                 </span>
                 {nextUp.item.title}{" "}
-                <span className={nextUp.isNow ? "font-bold text-emerald-600" : "text-black/55 dark:text-white/55"}>
+                <span className={nextUp.isNow ? "font-bold text-brand-600 dark:text-brand-300" : "text-black/55 dark:text-white/55"}>
                   {formatNextUp(nextUp.minutes, t)}
                 </span>
               </p>
@@ -286,7 +288,7 @@ export function TodayViewScreen() {
             {gain && (
               <span
                 key={gain.n}
-                className="today-view-gain rounded-full bg-emerald-600 px-3 py-1 text-sm font-bold whitespace-nowrap text-white shadow"
+                className="today-view-gain rounded-full bg-brand-600 px-3 py-1 text-sm font-bold whitespace-nowrap text-white shadow"
               >
                 +{gain.amount}
                 {gain.bonus > 0 && ` · ${t("today.gainBonus", { n: gain.bonus })}`}
@@ -334,7 +336,7 @@ export function TodayViewScreen() {
               className="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/15"
             >
               <div
-                className="today-view-progress-fill h-full rounded-full bg-emerald-600"
+                className="today-view-progress-fill h-full rounded-full bg-gradient-to-r from-brand-500 to-pink-400"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -370,7 +372,7 @@ export function TodayViewScreen() {
               <p className="text-lg text-black/55 dark:text-white/55">{t("today.emptyDay")}</p>
               <Link
                 href={`/plan-editor?date=${viewed.dateKey}`}
-                className="rounded-full bg-foreground px-5 py-2.5 text-base font-semibold text-background"
+                className="rounded-full bg-brand-600 px-5 py-2.5 text-base font-semibold text-white"
               >
                 {t("today.planThisDay")}
               </Link>

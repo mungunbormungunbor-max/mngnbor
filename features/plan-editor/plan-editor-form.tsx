@@ -27,12 +27,12 @@ type Props = {
 const EMPTY: PlanEditorDraft = { title: "", startTime: "", note: "" };
 
 const inputClass =
-  "w-full rounded-xl border border-black/15 bg-transparent px-3 py-3 text-lg outline-none transition-colors focus:border-emerald-600 dark:border-white/20 dark:focus:border-emerald-500";
+  "w-full rounded-xl border border-black/15 bg-transparent px-3 py-3 text-lg outline-none transition-colors focus:border-brand-600 dark:border-white/20 dark:focus:border-brand-500";
 
 const chipClass =
   "plan-editor-chip shrink-0 rounded-full border px-3 py-1.5 text-sm font-semibold whitespace-nowrap";
 const chipOff = "border-black/15 dark:border-white/20";
-const chipOn = "border-emerald-600 bg-emerald-600 text-white";
+const chipOn = "border-brand-600 bg-brand-600 text-white";
 
 export function PlanEditorForm({
   initial = EMPTY,
@@ -100,7 +100,7 @@ export function PlanEditorForm({
           className={`${inputClass} font-semibold ${shaking ? "plan-editor-shake border-red-500 dark:border-red-500" : ""}`}
         />
         {detected && (
-          <p className="plan-editor-banner mt-2 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+          <p className="plan-editor-banner mt-2 flex items-center gap-2 text-sm font-medium text-brand-700 dark:text-brand-400">
             <span aria-hidden>⏰</span>
             <span className="min-w-0 truncate">
               {t("editor.willSchedule", {
@@ -187,7 +187,7 @@ export function PlanEditorForm({
       <div className="flex gap-3">
         <button
           type="submit"
-          className="flex-1 rounded-xl bg-foreground px-4 py-3 text-lg font-semibold text-background transition-opacity active:opacity-80"
+          className="flex-1 rounded-xl bg-brand-600 px-4 py-3 text-lg font-semibold text-white transition-opacity active:opacity-80"
         >
           {submitLabel}
         </button>

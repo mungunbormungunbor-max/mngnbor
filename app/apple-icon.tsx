@@ -14,7 +14,7 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#111111",
+          background: "#3b2a78",
         }}
       >
         <div
@@ -28,13 +28,13 @@ export default function AppleIcon() {
             overflow: "hidden",
           }}
         >
-          <div style={{ height: 24, background: "#10b981" }} />
+          <div style={{ height: 24, background: "#ff7eb6" }} />
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="64" height="64" viewBox="0 0 20 20">
               <path
                 d="M4 10.5l4 4 8-9"
                 fill="none"
-                stroke="#111111"
+                stroke="#6d4ae0"
                 strokeWidth={3}
                 strokeLinecap="round"
                 strokeLinejoin="round"
