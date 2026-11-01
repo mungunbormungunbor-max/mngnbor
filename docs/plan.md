@@ -78,6 +78,16 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
+### **`money-tracker`** (owner request)
+
+* Income and expense records at `/money-tracker` (open it from the ☰ menu). Add a record: Income or Expense, amount,
+  category, date (default today), optional note. Tap a record to edit or delete it (delete has Undo).
+* Summary cards: **remaining balance** (income minus expenses; turns red-orange when negative), **total income**,
+  **total expenses**. View a single month (‹ › arrows) or All time; filter the list by All / Income / Expense
+  (the totals always cover the whole period). Currency: MNT ₮ / USD $ / EUR € (default follows the language).
+* Stage 1 data: localStorage `daily-plan:money-entries` (named after the future `money_entries` table) and
+  `daily-plan:money-prefs`. Fields: id, kind, amount, category, note, date, createdAt.
+
 ### **Appearance** (owner request, whole app)
 
 * Light / Dark / System switch in the ☰ menu (default: System, follows the phone). The choice is saved in
