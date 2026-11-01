@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/lib/i18n/provider";
 import type { PlanEditorDraft, PlanEditorItem } from "./types";
 import { PlanEditorForm } from "./plan-editor-form";
 import { PlanEditorTimePill } from "./plan-editor-time-pill";
@@ -45,6 +46,7 @@ export function PlanEditorItemRow({
   onMoveUp,
   onMoveDown,
 }: Props) {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
 
   function run(action: () => void) {
@@ -57,7 +59,7 @@ export function PlanEditorItemRow({
       <li data-flip-id={item.id} className="plan-editor-enter rounded-2xl border border-emerald-600/40 p-3">
         <PlanEditorForm
           autoFocus
-          submitLabel="Save"
+          submitLabel={t("editor.save")}
           initial={{ title: item.title, startTime: item.startTime ?? "", note: item.note ?? "" }}
           onSubmit={onSave}
           onCancel={onCancelEdit}
@@ -85,12 +87,17 @@ export function PlanEditorItemRow({
           )}
           {conflictWith && (
             <span className="block truncate text-sm font-semibold text-amber-600 dark:text-amber-400">
-              ⚠ Same time as {conflictWith}
+              {t("editor.sameTime", { title: conflictWith })}
             </span>
           )}
         </button>
 
-        <PlanEditorTimePill value={item.startTime} onChange={onTimeChange} label={`Time for ${item.title}`} />
+        <PlanEditorTimePill
+          value={item.startTime}
+          onChange={onTimeChange}
+          label={t("editor.timeFor", { title: item.title })}
+          clearLabel={t("editor.clearTime", { title: item.title })}
+        />
 
         {(onMoveUp || onMoveDown) && (
           <span className="flex flex-col">
@@ -98,7 +105,7 @@ export function PlanEditorItemRow({
               type="button"
               onClick={onMoveUp}
               disabled={!onMoveUp}
-              aria-label={`Move ${item.title} up`}
+              aria-label={t("editor.moveUp", { title: item.title })}
               className={`${iconButton} size-7 text-sm`}
             >
               ▲
@@ -107,7 +114,7 @@ export function PlanEditorItemRow({
               type="button"
               onClick={onMoveDown}
               disabled={!onMoveDown}
-              aria-label={`Move ${item.title} down`}
+              aria-label={t("editor.moveDown", { title: item.title })}
               className={`${iconButton} size-7 text-sm`}
             >
               ▼
@@ -118,7 +125,7 @@ export function PlanEditorItemRow({
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          aria-label={`More actions for ${item.title}`}
+          aria-label={t("editor.moreActions", { title: item.title })}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
           className={iconButton}
@@ -133,7 +140,7 @@ export function PlanEditorItemRow({
         <>
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={t("editor.closeMenu")}
             tabIndex={-1}
             onClick={() => setMenuOpen(false)}
             className="fixed inset-0 z-10 cursor-default"
@@ -143,10 +150,10 @@ export function PlanEditorItemRow({
             className="plan-editor-menu absolute top-full right-1 z-20 mt-1 w-56 overflow-hidden rounded-2xl border border-black/10 bg-background shadow-xl dark:border-white/15"
           >
             <button type="button" role="menuitem" onClick={() => run(onDuplicate)} className={menuItem}>
-              <span aria-hidden>⧉</span> Duplicate
+              <span aria-hidden>⧉</span> {t("editor.duplicate")}
             </button>
             <button type="button" role="menuitem" onClick={() => run(onMoveToTomorrow)} className={menuItem}>
-              <span aria-hidden>→</span> Move to tomorrow
+              <span aria-hidden>→</span> {t("editor.moveToTomorrow")}
             </button>
             <button
               type="button"
@@ -154,7 +161,7 @@ export function PlanEditorItemRow({
               onClick={() => run(onDelete)}
               className={`${menuItem} text-red-600 dark:text-red-400`}
             >
-              <span aria-hidden>🗑</span> Delete
+              <span aria-hidden>🗑</span> {t("editor.delete")}
             </button>
           </div>
         </>

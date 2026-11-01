@@ -55,7 +55,8 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 * Bilingual (owner request, whole app): Mongolian / English, chosen from a menu (☰) in the `today-view`
   header and on the login/signup pages. Shared code lives in `lib/i18n/` (all text in `messages.ts`) and
   `components/app-menu.tsx`; the choice is saved in the `daily-plan-lang` cookie. New features must add
-  their text to `messages.ts` in both languages. `app-settings` can later reuse the same language option.
+  their text to `messages.ts` in both languages. `plan-editor` is translated too (menu in its header). `app-settings`
+  can later reuse the same language option. Smart quick-add still recognises English "at 7pm" and 24h "19:00".
 
 ### **`plan-editor`**
 

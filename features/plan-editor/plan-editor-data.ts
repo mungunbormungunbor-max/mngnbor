@@ -1,3 +1,4 @@
+import type { MessageKey } from "@/lib/i18n/messages";
 import type { PlanEditorDraft, PlanEditorItem } from "./types";
 
 /*
@@ -82,12 +83,12 @@ export function cleanPlanEditorDraft(
   };
 }
 
-/** "07:00" -> "7:00 AM" in the user's locale. */
-export function formatPlanEditorTime(startTime: string): string {
+/** "07:00" -> "7:00 AM" in the given locale (undefined = the phone's own). */
+export function formatPlanEditorTime(startTime: string, locale?: string): string {
   const [h, m] = startTime.split(":").map(Number);
   const d = new Date();
   d.setHours(h, m, 0, 0);
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
 }
 
 /* ---------- date helpers ---------- */
@@ -164,11 +165,11 @@ export function parsePlanEditorSmartTitle(raw: string): PlanEditorSmartParse | n
 
 /* ---------- quick time chips ---------- */
 
-export const PLAN_EDITOR_QUICK_TIMES: { label: string; value: string }[] = [
-  { label: "Morning", value: "08:00" },
-  { label: "Noon", value: "12:00" },
-  { label: "Afternoon", value: "15:00" },
-  { label: "Evening", value: "19:00" },
+export const PLAN_EDITOR_QUICK_TIMES: { label: MessageKey; value: string }[] = [
+  { label: "editor.morning", value: "08:00" },
+  { label: "editor.noon", value: "12:00" },
+  { label: "editor.afternoon", value: "15:00" },
+  { label: "editor.evening", value: "19:00" },
 ];
 
 /** One hour from now, rounded up to the next 5 minutes. Null if that would pass midnight. */

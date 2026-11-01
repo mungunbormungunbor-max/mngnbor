@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { AppMenu } from "@/components/app-menu";
+import { useI18n } from "@/lib/i18n/provider";
 import type { PlanEditorDraft, PlanEditorItem } from "./types";
 import {
   cleanPlanEditorDraft,
@@ -37,6 +39,7 @@ type UndoAction =
 type Undo = { message: string; action: UndoAction; n: number };
 
 export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
+  const { t, locale } = useI18n();
   const [plan, setPlan] = useState<Loaded | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [flash, setFlash] = useState<{ id: string; n: number }>({ id: "", n: 0 });
@@ -61,8 +64,8 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
 
   useEffect(() => {
     if (!undo) return;
-    const t = window.setTimeout(() => setUndo(null), UNDO_MS);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => setUndo(null), UNDO_MS);
+    return () => window.clearTimeout(timer);
   }, [undo]);
 
   function commit(items: PlanEditorItem[], flashId?: string) {
@@ -136,7 +139,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     navigator.vibrate?.(15);
     commit(plan.items.filter((it) => it.id !== id));
     if (editingId === id) setEditingId(null);
-    offerUndo(`Deleted “${item.title}”`, { kind: "delete", item });
+    offerUndo(t("editor.deleted", { title: item.title }), { kind: "delete", item });
   }
 
   function moveToTomorrow(id: string) {
@@ -155,7 +158,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     navigator.vibrate?.(15);
     commit(plan.items.filter((it) => it.id !== id));
     if (editingId === id) setEditingId(null);
-    offerUndo(`Moved “${item.title}” to tomorrow`, { kind: "tomorrow", item, tomorrowKey, copyId: copy.id });
+    offerUndo(t("editor.movedTomorrow", { title: item.title }), { kind: "tomorrow", item, tomorrowKey, copyId: copy.id });
   }
 
   function clearDone() {
@@ -164,7 +167,10 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     if (done.length === 0) return;
     navigator.vibrate?.(15);
     commit(plan.items.filter((it) => !it.isDone));
-    offerUndo(`Cleared ${done.length} done ${done.length === 1 ? "item" : "items"}`, { kind: "clear", items: done });
+    offerUndo(t(done.length === 1 ? "editor.clearedOne" : "editor.clearedMany", { n: done.length }), {
+      kind: "clear",
+      items: done,
+    });
   }
 
   function runUndo() {
@@ -222,7 +228,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
   usePlanEditorFlip(listRef, [...scheduled, ...anytime].map((it) => `${it.id}:${it.startTime}:${it.sortOrder}`).join("|"));
 
   const dateLabel = plan
-    ? planEditorDateFromKey(plan.dateKey).toLocaleDateString(undefined, {
+    ? planEditorDateFromKey(plan.dateKey).toLocaleDateString(locale, {
         weekday: "long",
         month: "long",
         day: "numeric",
@@ -259,42 +265,43 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
       <header className="mb-5 flex items-center gap-3">
         <Link
           href="/today-view"
-          aria-label="Back to today"
+          aria-label={t("today.backToToday")}
           className="flex size-11 shrink-0 items-center justify-center rounded-full border border-black/15 text-xl active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
         >
           ←
         </Link>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium tracking-wide text-black/55 uppercase dark:text-white/55">
-            {plan ? (plan.isToday ? "Edit today's plan" : "Edit plan") : " "}
+            {plan ? (plan.isToday ? t("editor.titleToday") : t("editor.titleOther")) : " "}
           </p>
           <h1 className="truncate text-2xl font-bold">{dateLabel}</h1>
         </div>
+        <AppMenu className="shrink-0" />
       </header>
 
       {carry.length > 0 && (
         <div
           role="region"
-          aria-label="Unfinished from yesterday"
+          aria-label={t("editor.carryLabel")}
           className="plan-editor-banner mb-4 flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3"
         >
           <span aria-hidden className="text-2xl">
             📋
           </span>
           <p className="min-w-0 flex-1 text-base font-medium">
-            {carry.length} unfinished from yesterday
+            {t("editor.carryText", { n: carry.length })}
           </p>
           <button
             type="button"
             onClick={bringOverUnfinished}
             className="shrink-0 rounded-xl bg-foreground px-3 py-2 text-sm font-bold text-background active:opacity-80"
           >
-            Bring over
+            {t("editor.bringOver")}
           </button>
           <button
             type="button"
             onClick={dismissCarry}
-            aria-label="Dismiss"
+            aria-label={t("editor.dismiss")}
             className="shrink-0 rounded-full px-2 text-xl leading-none text-black/50 active:bg-black/5 dark:text-white/55"
           >
             ×
@@ -302,13 +309,13 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         </div>
       )}
 
-      <section aria-label="Add an item" className="mb-6 rounded-2xl bg-black/[0.03] p-3 dark:bg-white/[0.06]">
-        <PlanEditorForm submitLabel="Add to plan" onSubmit={addItem} resetOnSubmit smart suggestions={formSuggestions} />
+      <section aria-label={t("editor.addSection")} className="mb-6 rounded-2xl bg-black/[0.03] p-3 dark:bg-white/[0.06]">
+        <PlanEditorForm submitLabel={t("editor.add")} onSubmit={addItem} resetOnSubmit smart suggestions={formSuggestions} />
       </section>
 
       {plan && items.length === 0 && (
         <p className="plan-editor-enter py-8 text-center text-lg text-black/55 dark:text-white/55">
-          No items yet. Add your first one above.
+          {t("editor.empty")}
         </p>
       )}
 
@@ -316,7 +323,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         {scheduled.length > 0 && (
           <section className="mb-4">
             <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
-              Scheduled
+              {t("editor.scheduled")}
             </h2>
             <ul className="flex flex-col">{scheduled.map((item) => renderRow(item))}</ul>
           </section>
@@ -325,7 +332,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
         {anytime.length > 0 && (
           <section>
             <h2 className="mb-1 px-3 text-sm font-semibold tracking-wide text-black/55 uppercase dark:text-white/55">
-              Anytime
+              {t("editor.anytime")}
             </h2>
             <ul className="flex flex-col">
               {anytime.map((item, index) => renderRow(item, { index, list: anytime }))}
@@ -336,14 +343,14 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
 
       {items.length > 0 && (
         <div className="mt-6 flex items-center justify-between gap-3 px-3">
-          <p className="text-sm text-black/45 dark:text-white/45">Tap an item to edit it. Tap a time to change it.</p>
+          <p className="text-sm text-black/45 dark:text-white/45">{t("editor.hint")}</p>
           {doneCount > 0 && (
             <button
               type="button"
               onClick={clearDone}
               className="shrink-0 rounded-full border border-black/15 px-3 py-1.5 text-sm font-semibold active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
             >
-              Clear done ({doneCount})
+              {t("editor.clearDone", { n: doneCount })}
             </button>
           )}
         </div>
@@ -361,7 +368,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
             onClick={runUndo}
             className="shrink-0 rounded-xl px-4 py-2 font-bold text-emerald-400 active:bg-white/10 dark:text-emerald-700 dark:active:bg-black/10"
           >
-            Undo
+            {t("editor.undo")}
           </button>
         </div>
       )}

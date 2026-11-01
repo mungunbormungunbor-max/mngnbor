@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import { useI18n } from "@/lib/i18n/provider";
 import type { PlanEditorDraft } from "./types";
 import {
   PLAN_EDITOR_QUICK_TIMES,
@@ -43,6 +44,7 @@ export function PlanEditorForm({
   smart,
   suggestions = [],
 }: Props) {
+  const { t, locale } = useI18n();
   const [draft, setDraft] = useState<PlanEditorDraft>(initial);
   const [ignoreSmart, setIgnoreSmart] = useState(false);
   const [shaking, setShaking] = useState(false);
@@ -84,8 +86,8 @@ export function PlanEditorForm({
         <input
           ref={titleRef}
           type="text"
-          aria-label="Title"
-          placeholder={smart ? "What to do? e.g. Gym at 7pm" : "What do you need to do?"}
+          aria-label={t("editor.fieldTitle")}
+          placeholder={smart ? t("editor.placeholderSmart") : t("editor.placeholder")}
           maxLength={120}
           autoFocus={autoFocus}
           value={draft.title}
@@ -101,12 +103,15 @@ export function PlanEditorForm({
           <p className="plan-editor-banner mt-2 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
             <span aria-hidden>⏰</span>
             <span className="min-w-0 truncate">
-              Will schedule “{detected.title}” at {formatPlanEditorTime(detected.startTime)}
+              {t("editor.willSchedule", {
+                title: detected.title,
+                time: formatPlanEditorTime(detected.startTime, locale),
+              })}
             </span>
             <button
               type="button"
               onClick={() => setIgnoreSmart(true)}
-              aria-label="Don't detect the time"
+              aria-label={t("editor.noDetect")}
               className="ml-auto shrink-0 rounded-full px-2 text-lg leading-none text-black/45 active:bg-black/5 dark:text-white/50"
             >
               ×
@@ -114,7 +119,7 @@ export function PlanEditorForm({
           </p>
         )}
         {shownSuggestions.length > 0 && (
-          <div className="mt-2 flex gap-2 overflow-x-auto pb-1" aria-label="Suggestions">
+          <div className="mt-2 flex gap-2 overflow-x-auto pb-1" aria-label={t("editor.suggestions")}>
             {shownSuggestions.map((s) => (
               <button
                 key={s}
@@ -135,7 +140,7 @@ export function PlanEditorForm({
 
       <div className="flex gap-3">
         <label className="flex w-40 shrink-0 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          Time (optional)
+          {t("editor.timeOptional")}
           <input
             type="time"
             value={draft.startTime}
@@ -144,7 +149,7 @@ export function PlanEditorForm({
           />
         </label>
         <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">
-          Note (optional)
+          {t("editor.noteOptional")}
           <input
             type="text"
             maxLength={200}
@@ -155,27 +160,27 @@ export function PlanEditorForm({
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-2" aria-label="Quick times">
-        {PLAN_EDITOR_QUICK_TIMES.map((t) => (
+      <div className="flex flex-wrap gap-2" aria-label={t("editor.quickTimes")}>
+        {PLAN_EDITOR_QUICK_TIMES.map((q) => (
           <button
-            key={t.value}
+            key={q.value}
             type="button"
-            aria-pressed={draft.startTime === t.value}
-            onClick={() => setTime(t.value)}
-            className={`${chipClass} ${draft.startTime === t.value ? chipOn : chipOff}`}
+            aria-pressed={draft.startTime === q.value}
+            onClick={() => setTime(q.value)}
+            className={`${chipClass} ${draft.startTime === q.value ? chipOn : chipOff}`}
           >
-            {t.label}
+            {t(q.label)}
           </button>
         ))}
         <button
           type="button"
           onClick={() => {
-            const t = planEditorInOneHour(new Date());
-            if (t) setTime(t);
+            const inOneHour = planEditorInOneHour(new Date());
+            if (inOneHour) setTime(inOneHour);
           }}
           className={`${chipClass} ${chipOff}`}
         >
-          In 1 hour
+          {t("editor.inOneHour")}
         </button>
       </div>
 
@@ -192,7 +197,7 @@ export function PlanEditorForm({
             onClick={onCancel}
             className="rounded-xl border border-black/15 px-4 py-3 text-lg font-semibold dark:border-white/20"
           >
-            Cancel
+            {t("editor.cancel")}
           </button>
         )}
       </div>
