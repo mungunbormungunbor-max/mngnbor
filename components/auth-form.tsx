@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -14,8 +13,8 @@ type Mode = "login" | "signup";
 const altHref = { login: "/signup", signup: "/login" } as const;
 
 export function AuthForm({ mode }: { mode: Mode }) {
-  const router = useRouter();
   const { t } = useI18n();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // Our own messages are stored as keys so they re-translate if the language changes;
@@ -39,7 +38,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const { data, error } =
       mode === "login"
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+        : await supabase.auth.signUp({
+            email,
+            password,
+            // The database trigger copies this into the new user's profile (sql/my-account.sql).
+            options: { data: { display_name: name.trim().slice(0, 60) } },
+          });
     setPending(false);
 
     if (error) {
@@ -50,8 +54,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
       setMessage("auth.checkEmail");
       return;
     }
-    router.replace("/today-view");
-    router.refresh();
+    // A full page load, so the app starts fresh with this user's own data and nothing from a previous account.
+    window.location.replace("/today-view");
   }
 
   return (
@@ -59,6 +63,19 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <AppMenu className="absolute top-[max(1rem,env(safe-area-inset-top))] right-6" />
       <h1 className="mb-8 text-3xl font-bold">{t(`auth.${mode}.title`)}</h1>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        {mode === "signup" && (
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            {t("auth.name")}
+            <input
+              type="text"
+              autoComplete="name"
+              maxLength={60}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="rounded-lg border border-black/15 bg-transparent px-3 py-3 text-base dark:border-white/20"
+            />
+          </label>
+        )}
         <label className="flex flex-col gap-1 text-sm font-medium">
           {t("auth.email")}
           <input
@@ -75,7 +92,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <input
             type="password"
             required
-            minLength={6}
+            minLength={mode === "signup" ? 8 : undefined}
+            placeholder={mode === "signup" ? t("auth.passwordHint") : undefined}
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}

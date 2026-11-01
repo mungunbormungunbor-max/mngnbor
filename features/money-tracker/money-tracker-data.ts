@@ -1,3 +1,4 @@
+import { scopeKey } from "@/lib/user-scope/user-scope";
 import type { MessageKey } from "@/lib/i18n/messages";
 import type {
   MoneyTrackerCurrency,
@@ -65,7 +66,7 @@ function isEntry(value: unknown): value is MoneyTrackerEntry {
 
 export function loadMoneyTrackerEntries(): MoneyTrackerEntry[] {
   try {
-    const parsed: unknown = JSON.parse(window.localStorage.getItem(ENTRIES_KEY) ?? "[]");
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(scopeKey(ENTRIES_KEY)) ?? "[]");
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(isEntry).map((e) => ({ ...e, note: e.note ?? null, createdAt: e.createdAt ?? 0 }));
   } catch {
@@ -74,12 +75,12 @@ export function loadMoneyTrackerEntries(): MoneyTrackerEntry[] {
 }
 
 export function saveMoneyTrackerEntries(entries: MoneyTrackerEntry[]): void {
-  window.localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  window.localStorage.setItem(scopeKey(ENTRIES_KEY), JSON.stringify(entries));
 }
 
 export function loadMoneyTrackerPrefs(defaultCurrency: MoneyTrackerCurrency): MoneyTrackerPrefs {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(PREFS_KEY) ?? "{}");
+    const parsed = JSON.parse(window.localStorage.getItem(scopeKey(PREFS_KEY)) ?? "{}");
     return {
       currency: MONEY_TRACKER_CURRENCIES.includes(parsed?.currency) ? parsed.currency : defaultCurrency,
     };
@@ -89,7 +90,7 @@ export function loadMoneyTrackerPrefs(defaultCurrency: MoneyTrackerCurrency): Mo
 }
 
 export function saveMoneyTrackerPrefs(prefs: MoneyTrackerPrefs): void {
-  window.localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  window.localStorage.setItem(scopeKey(PREFS_KEY), JSON.stringify(prefs));
 }
 
 export function newMoneyTrackerId(): string {

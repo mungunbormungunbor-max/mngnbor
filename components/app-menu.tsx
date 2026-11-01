@@ -11,6 +11,7 @@ const NAV = [
   { href: "/today-view", icon: "☀️", label: "menu.today" },
   { href: "/plan-editor", icon: "📝", label: "menu.plan" },
   { href: "/money-tracker", icon: "💰", label: "menu.money" },
+  { href: "/my-account", icon: "👤", label: "menu.account" },
 ] as const;
 
 /** Small hamburger menu with the language options (Монгол / English). */

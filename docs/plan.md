@@ -78,6 +78,24 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
+### **`my-account`** (owner request, first Stage 2/3 feature)
+
+* `/my-account` (open it from the ☰ menu): your **unique user ID** (the Supabase Auth UUID, with a Copy button),
+  **profile** (view and edit display name; email shown read-only; member-since date), and **account settings**
+  (change password, sign out, delete account with the email typed to confirm).
+* Registration (`/signup`, now with a name field and 8+ character passwords) and login (`/login`) use Supabase Auth.
+  The proxy sends signed-out visitors to `/login`. Signing in/out does a full page load so no data carries over.
+* **Privacy:** `sql/my-account.sql` creates `profiles` (id = auth user id) with row level security so each user can
+  only read and change their own row, creates the profile automatically at signup, and adds `delete_my_account()`.
+  Until plans and money records move to the database, they stay in this browser, and every storage key is prefixed
+  with the user ID (`lib/user-scope`), so two accounts on one phone never see each other's data. Signed-out (guest) data
+  keeps the old unprefixed keys and is not copied into new accounts.
+* **To switch it on:** (1) create a Supabase project, (2) run `sql/my-account.sql` in the SQL Editor, (3) put
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` and in Vercel, (4) in Supabase
+  Authentication -> URL Configuration set the Site URL to the deployed address.
+* Next (not done yet): move `plan_items` and `money_entries` into the database with `user_id` + the same row level
+  security, so data follows the user across devices; password reset by email.
+
 ### **`money-tracker`** (owner request)
 
 * Income and expense records at `/money-tracker` (open it from the ☰ menu). Add a record: Income or Expense, amount,

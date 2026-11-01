@@ -1,3 +1,4 @@
+import { scopeKey } from "@/lib/user-scope/user-scope";
 import type { MessageKey } from "@/lib/i18n/messages";
 import type { PlanEditorDraft, PlanEditorItem } from "./types";
 
@@ -33,7 +34,7 @@ export function planEditorDateFromKey(dateKey: string): Date {
 }
 
 export function loadPlanEditorItems(dateKey: string): PlanEditorItem[] {
-  const raw = window.localStorage.getItem(STORAGE_PREFIX + dateKey);
+  const raw = window.localStorage.getItem(scopeKey(STORAGE_PREFIX + dateKey));
   if (raw === null) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -45,9 +46,9 @@ export function loadPlanEditorItems(dateKey: string): PlanEditorItem[] {
 
 export function savePlanEditorItems(dateKey: string, items: PlanEditorItem[]): void {
   if (items.length === 0) {
-    window.localStorage.removeItem(STORAGE_PREFIX + dateKey);
+    window.localStorage.removeItem(scopeKey(STORAGE_PREFIX + dateKey));
   } else {
-    window.localStorage.setItem(STORAGE_PREFIX + dateKey, JSON.stringify(items));
+    window.localStorage.setItem(scopeKey(STORAGE_PREFIX + dateKey), JSON.stringify(items));
   }
 }
 
@@ -209,11 +210,11 @@ export function loadUnfinishedFromPreviousDay(dateKey: string): PlanEditorItem[]
 const CARRY_DISMISSED_PREFIX = "daily-plan:plan-editor-carry-dismissed:";
 
 export function isPlanEditorCarryDismissed(dateKey: string): boolean {
-  return window.localStorage.getItem(CARRY_DISMISSED_PREFIX + dateKey) === "1";
+  return window.localStorage.getItem(scopeKey(CARRY_DISMISSED_PREFIX + dateKey)) === "1";
 }
 
 export function dismissPlanEditorCarry(dateKey: string): void {
-  window.localStorage.setItem(CARRY_DISMISSED_PREFIX + dateKey, "1");
+  window.localStorage.setItem(scopeKey(CARRY_DISMISSED_PREFIX + dateKey), "1");
 }
 
 /** Items that share a start time with another item: id -> title of the first other item. */

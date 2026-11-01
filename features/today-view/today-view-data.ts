@@ -1,3 +1,4 @@
+import { scopeKey } from "@/lib/user-scope/user-scope";
 import type { TodayViewItem } from "./types";
 
 /*
@@ -36,7 +37,7 @@ export function getTodayViewWeek(now: Date, weekOffset: number): TodayViewWeekDa
 }
 
 export function loadTodayViewItems(dateKey: string): TodayViewItem[] {
-  const raw = window.localStorage.getItem(STORAGE_PREFIX + dateKey);
+  const raw = window.localStorage.getItem(scopeKey(STORAGE_PREFIX + dateKey));
   if (raw === null) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -47,7 +48,7 @@ export function loadTodayViewItems(dateKey: string): TodayViewItem[] {
 }
 
 export function saveTodayViewItems(dateKey: string, items: TodayViewItem[]): void {
-  window.localStorage.setItem(STORAGE_PREFIX + dateKey, JSON.stringify(items));
+  window.localStorage.setItem(scopeKey(STORAGE_PREFIX + dateKey), JSON.stringify(items));
 }
 
 /** Timed items first, by time; then untimed items in their saved order. */
@@ -170,19 +171,19 @@ export function getTodayViewStreakBonus(streak: number): number {
  * and toggling can't farm them. Deleting items in plan-editor doesn't erase points already earned.
  */
 export function saveTodayViewDayPoints(dateKey: string, points: number): void {
-  if (points <= 0) window.localStorage.removeItem(POINTS_PREFIX + dateKey);
-  else window.localStorage.setItem(POINTS_PREFIX + dateKey, String(points));
+  if (points <= 0) window.localStorage.removeItem(scopeKey(POINTS_PREFIX + dateKey));
+  else window.localStorage.setItem(scopeKey(POINTS_PREFIX + dateKey), String(points));
 }
 
 export function hasTodayViewDayPoints(dateKey: string): boolean {
-  return window.localStorage.getItem(POINTS_PREFIX + dateKey) !== null;
+  return window.localStorage.getItem(scopeKey(POINTS_PREFIX + dateKey)) !== null;
 }
 
 export function loadTodayViewTotalPoints(): number {
   let total = 0;
   for (let i = 0; i < window.localStorage.length; i++) {
     const key = window.localStorage.key(i);
-    if (!key?.startsWith(POINTS_PREFIX)) continue;
+    if (!key?.startsWith(scopeKey(POINTS_PREFIX))) continue;
     const n = Number(window.localStorage.getItem(key));
     if (Number.isFinite(n) && n > 0) total += n;
   }
@@ -215,7 +216,7 @@ export type TodayViewPrefs = { hideDone: boolean };
 
 export function loadTodayViewPrefs(): TodayViewPrefs {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(PREFS_KEY) ?? "{}");
+    const parsed = JSON.parse(window.localStorage.getItem(scopeKey(PREFS_KEY)) ?? "{}");
     return { hideDone: parsed?.hideDone === true };
   } catch {
     return { hideDone: false };
@@ -223,7 +224,7 @@ export function loadTodayViewPrefs(): TodayViewPrefs {
 }
 
 export function saveTodayViewPrefs(prefs: TodayViewPrefs): void {
-  window.localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  window.localStorage.setItem(scopeKey(PREFS_KEY), JSON.stringify(prefs));
 }
 
 /* ---------- look & feel ---------- */
