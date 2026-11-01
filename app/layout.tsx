@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NotificationsScheduler } from "@/features/notifications";
+import { THEME_INIT_SCRIPT } from "@/lib/theme/theme";
+import { ThemeSync } from "@/lib/theme/theme-sync";
 import { I18nProvider } from "@/lib/i18n/provider";
 import { getServerLanguage } from "@/lib/i18n/server";
 import "./globals.css";
@@ -34,14 +36,20 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getServerLanguage();
   return (
+    // suppressHydrationWarning: the init script adds the `dark` class to <html> before React loads.
     <html
       lang={lang}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <I18nProvider initialLang={lang}>
           {children}
           <NotificationsScheduler />
+          <ThemeSync />
         </I18nProvider>
       </body>
     </html>

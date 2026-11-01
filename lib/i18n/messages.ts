@@ -131,6 +131,11 @@ const en = {
   "editor.moveToTomorrow": "Move to tomorrow",
   "editor.delete": "Delete",
 
+  "theme.title": "Appearance",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "theme.system": "System",
+
   "notif.title": "Notifications",
   "notif.toggle": "Remind me about timed items",
   "notif.when": "When to remind",
@@ -266,6 +271,11 @@ const mn: Record<MessageKey, string> = {
   "editor.duplicate": "Хувилах",
   "editor.moveToTomorrow": "Маргааш руу зөөх",
   "editor.delete": "Устгах",
+
+  "theme.title": "Харагдац",
+  "theme.light": "Цайвар",
+  "theme.dark": "Харанхуй",
+  "theme.system": "Утасны",
 
   "notif.title": "Мэдэгдэл",
   "notif.toggle": "Цагтай зүйлсийг сануулах",

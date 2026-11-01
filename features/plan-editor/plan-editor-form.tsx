@@ -145,7 +145,7 @@ export function PlanEditorForm({
             type="time"
             value={draft.startTime}
             onChange={(e) => setDraft({ ...draft, startTime: e.target.value })}
-            className={`${inputClass} text-black dark:text-white [color-scheme:light_dark]`}
+            className={`${inputClass} text-black dark:text-white`}
           />
         </label>
         <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium text-black/60 dark:text-white/60">

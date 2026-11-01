@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LANGUAGES, LANGUAGE_NAMES } from "@/lib/i18n/messages";
+import { ThemePicker } from "@/components/theme-picker";
 import { NotificationsPanel } from "@/features/notifications";
 import { useI18n } from "@/lib/i18n/provider";
 
@@ -45,7 +46,7 @@ export function AppMenu({ className = "" }: { className?: string }) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 z-40 mt-2 w-72 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-black/10 bg-background p-1 shadow-lg dark:border-white/15"
+          className="absolute right-0 z-40 mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-2xl border border-black/10 bg-background p-1 shadow-lg dark:border-white/15"
         >
           <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-black/50 uppercase dark:text-white/50">
             {t("menu.language")}
@@ -70,6 +71,7 @@ export function AppMenu({ className = "" }: { className?: string }) {
               )}
             </button>
           ))}
+          <ThemePicker />
           <NotificationsPanel />
         </div>
       )}

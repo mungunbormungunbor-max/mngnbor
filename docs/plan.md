@@ -78,6 +78,12 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
+### **Appearance** (owner request, whole app)
+
+* Light / Dark / System switch in the ☰ menu (default: System, follows the phone). The choice is saved in
+  localStorage (`daily-plan:theme`) and applied as a `dark` class on `<html>` before first paint, so there is no
+  flash. Code: `lib/theme/`, `components/theme-picker.tsx`. Address-bar colour follows the choice.
+
 ### **`notifications`** (owner request)
 
 * Phone reminders for plan items that have a time. Turned on from the ☰ menu (asks the phone for permission),

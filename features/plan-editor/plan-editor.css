@@ -47,7 +47,7 @@
 
 /* Native time input that looks like a pill; the whole pill opens the picker. */
 .plan-editor-time-input {
-  color-scheme: light dark;
+  color-scheme: inherit;
 }
 .plan-editor-time-input::-webkit-calendar-picker-indicator {
   display: none;

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* `dark:` utilities follow the `dark` class on <html> instead of the phone's setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Color scheme: "Twilight" — a violet brand colour with a pink accent on a soft lavender canvas
  * (deep indigo at night). Use `brand-*` for actions and progress; `pink-*` as the warm accent.
@@ -31,18 +34,21 @@
   --color-brand-950: #231a4a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0e0b1f;
-    --foreground: #efedff;
-    --glow-a: rgb(132 103 245 / 0.28);
-    --glow-b: rgb(255 126 182 / 0.12);
-  }
+/* Dark mode is the `dark` class on <html>: set by the user's choice (Light / Dark / System). */
+:root.dark {
+  --background: #0e0b1f;
+  --foreground: #efedff;
+  --glow-a: rgb(132 103 245 / 0.28);
+  --glow-b: rgb(255 126 182 / 0.12);
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
   accent-color: var(--color-brand-600);
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
