@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useI18n } from "@/lib/i18n/provider";
 import type { TodayViewItem } from "./types";
 import { formatTodayViewTime, type TodayViewItemStatus } from "./today-view-data";
 import "./today-view.css";
@@ -11,11 +12,13 @@ type Props = {
   /** Position in the list, used to stagger the entrance animation. */
   index: number;
   onToggle: (id: string) => void;
+  /** Other days are view-only: points and streak only change from today's list. */
+  readOnly?: boolean;
 };
 
-const BADGE: Record<"now" | "next", { label: string; className: string }> = {
-  now: { label: "Now", className: "bg-emerald-600 text-white" },
-  next: { label: "Next", className: "bg-black/10 text-black/80 dark:bg-white/15 dark:text-white/85" },
+const BADGE: Record<"now" | "next", { label: "today.badge.now" | "today.badge.next"; className: string }> = {
+  now: { label: "today.badge.now", className: "bg-emerald-600 text-white" },
+  next: { label: "today.badge.next", className: "bg-black/10 text-black/80 dark:bg-white/15 dark:text-white/85" },
 };
 
 /** How far (px) a swipe must travel to toggle the item. */
@@ -24,7 +27,8 @@ const SWIPE_MAX = 140;
 
 type Ripple = { id: number; x: number; y: number };
 
-export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
+export function TodayViewItemRow({ item, status, index, onToggle, readOnly = false }: Props) {
+  const { t, locale } = useI18n();
   const [popping, setPopping] = useState(false);
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -108,7 +112,7 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
           style={{ opacity: 0.35 + revealProgress * 0.65 }}
         >
           <span style={{ transform: `scale(${0.8 + revealProgress * 0.3})` }}>
-            {item.isDone ? "↺ Undo" : "✓ Done"}
+            {item.isDone ? t("today.swipeUndo") : t("today.swipeDone")}
           </span>
         </div>
       )}
@@ -117,6 +121,7 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
         type="button"
         role="checkbox"
         aria-checked={item.isDone}
+        disabled={readOnly}
         onClick={onClick}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -186,7 +191,7 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
                   BADGE[status].className
                 } ${status === "now" ? "today-view-pulse" : ""}`}
               >
-                {BADGE[status].label}
+                {t(BADGE[status].label)}
               </span>
             )}
             <span
@@ -197,9 +202,9 @@ export function TodayViewItemRow({ item, status, index, onToggle }: Props) {
                     ? "text-amber-600 dark:text-amber-400"
                     : "text-black/70 dark:text-white/70"
               }`}
-              title={status === "missed" ? "Time has passed" : undefined}
+              title={status === "missed" ? t("today.timePassed") : undefined}
             >
-              {formatTodayViewTime(item.startTime)}
+              {formatTodayViewTime(item.startTime, locale)}
             </span>
           </span>
         )}

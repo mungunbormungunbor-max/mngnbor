@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { AppMenu } from "@/components/app-menu";
+import { useI18n } from "@/lib/i18n/provider";
 import type { TodayViewItem } from "./types";
 import {
   computeTodayViewDayPoints,
@@ -12,25 +14,39 @@ import {
   getTodayViewStatuses,
   getTodayViewStreak,
   getTodayViewStreakBonus,
+  getTodayViewWeek,
   hasTodayViewDayPoints,
   loadTodayViewItems,
   loadTodayViewPrefs,
   loadTodayViewTotalPoints,
+  parseTodayViewDateKey,
   pickTodayViewCelebration,
   saveTodayViewDayPoints,
   saveTodayViewItems,
   saveTodayViewPrefs,
   sortTodayViewItems,
   toTodayViewDateKey,
+  type TodayViewCelebrationKey,
   type TodayViewPrefs,
 } from "./today-view-data";
 import { TodayViewItemRow } from "./today-view-item-row";
 import { TodayViewEmpty } from "./today-view-empty";
+import { TodayViewWeek } from "./today-view-week";
 import { CELEBRATION_MS, TodayViewCelebration } from "./today-view-celebration";
 import { useTodayViewCountUp } from "./use-today-view-count-up";
 import "./today-view.css";
 
 type Loaded = { dateKey: string; items: TodayViewItem[] };
+
+/** "in 25 min" / "in 1 h 5 min" / "happening now", in the current language. */
+function formatNextUp(minutes: number, t: ReturnType<typeof useI18n>["t"]): string {
+  if (minutes <= 0) return t("today.happeningNow");
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return t("today.inMin", { m });
+  if (m === 0) return t("today.inHours", { h });
+  return t("today.inHoursMin", { h, m });
+}
 
 export function TodayViewScreen() {
   // "Today" depends on the phone's clock and timezone, so it is read on the client only.
@@ -38,9 +54,14 @@ export function TodayViewScreen() {
   const [plan, setPlan] = useState<Loaded | null>(null);
   const [prefs, setPrefs] = useState<TodayViewPrefs>({ hideDone: false });
   const [streak, setStreak] = useState(0);
-  const [celebration, setCelebration] = useState<string | null>(null);
+  const { t, locale } = useI18n();
+  // Stored as a key so the banner follows a language change while it is showing.
+  const [celebration, setCelebration] = useState<TodayViewCelebrationKey | null>(null);
   const [points, setPoints] = useState(0);
   const [gain, setGain] = useState<{ n: number; amount: number; bonus: number } | null>(null);
+  // Week tabs: which week is shown, and which other day (if any) is open. null = today's own list.
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [viewed, setViewed] = useState<Loaded | null>(null);
   const scrolledRef = useRef(false);
 
   useEffect(() => {
@@ -119,6 +140,18 @@ export function TodayViewScreen() {
     }
   }
 
+  function selectDay(dateKey: string) {
+    setViewed(dateKey === plan?.dateKey ? null : { dateKey, items: loadTodayViewItems(dateKey) });
+  }
+
+  function shiftWeek(delta: -1 | 1) {
+    if (!now) return;
+    const next = weekOffset + delta;
+    setWeekOffset(next);
+    // Landing on this week selects today; any other week opens on its Monday.
+    selectDay(getTodayViewWeek(now, next)[next === 0 ? (now.getDay() + 6) % 7 : 0].dateKey);
+  }
+
   function toggleHideDone() {
     const next = { ...prefs, hideDone: !prefs.hideDone };
     setPrefs(next);
@@ -139,17 +172,20 @@ export function TodayViewScreen() {
   const bonusToday = getTodayViewStreakBonus(allDone ? streak : streak + 1);
   const visible = prefs.hideDone ? sorted.filter((it) => !it.isDone) : sorted;
   const sky = now ? getTodayViewSky(now) : null;
+  const week = now ? getTodayViewWeek(now, weekOffset) : [];
+  const viewedItems = viewed ? sortTodayViewItems(viewed.items) : [];
 
   // Remaining count on the installed app icon and in the tab title.
   useEffect(() => {
     if (!plan) return;
-    document.title = remaining > 0 ? `(${remaining}) Today · Daily Plan` : "Today · Daily Plan";
+    const title = t("today.tabTitle");
+    document.title = remaining > 0 ? `(${remaining}) ${title}` : title;
     const nav = navigator as Navigator & {
       setAppBadge?: (n?: number) => Promise<void>;
       clearAppBadge?: () => Promise<void>;
     };
     (remaining > 0 ? nav.setAppBadge?.(remaining) : nav.clearAppBadge?.())?.catch(() => {});
-  }, [plan, remaining]);
+  }, [plan, remaining, t]);
 
   // On first load, bring the current item into view so a long day opens where you are.
   const focusId = nextUp?.item.id;
@@ -175,11 +211,11 @@ export function TodayViewScreen() {
           <div className="min-w-0">
             <p className="text-lg font-medium text-black/60 dark:text-white/60">
               {now
-                ? `${getTodayViewGreeting(now)} · ${now.toLocaleDateString(undefined, { weekday: "long" })}`
+                ? `${t(`greeting.${getTodayViewGreeting(now)}`)}· ${now.toLocaleDateString(locale, { weekday: "long" })}`
                 : " "}
             </p>
             <h1 className="flex items-center gap-2 text-4xl font-bold tracking-tight">
-              {now ? now.toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "Today"}
+              {now ? now.toLocaleDateString(locale, { month: "long", day: "numeric" }) : t("today.title")}
               {sky && (
                 <span aria-hidden className="today-view-float text-3xl">
                   {sky.icon}
@@ -187,31 +223,36 @@ export function TodayViewScreen() {
               )}
             </h1>
           </div>
-          <Link
-            href="/plan-editor"
-            className="mt-2 shrink-0 rounded-full border border-black/15 px-4 py-2 text-base font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
-          >
-            Edit
-          </Link>
+          <div className="mt-1 flex shrink-0 items-center gap-2">
+            <Link
+              href="/plan-editor"
+              className="rounded-full border border-black/15 px-4 py-2 text-base font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
+            >
+              {t("today.edit")}
+            </Link>
+            <AppMenu />
+          </div>
         </div>
 
         {(nextUp || streak > 0) && (
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
             {nextUp && (
               <p className="min-w-0 truncate font-medium">
-                <span className="text-black/55 dark:text-white/55">{nextUp.isNow ? "Now: " : "Next: "}</span>
+                <span className="text-black/55 dark:text-white/55">
+                  {nextUp.isNow ? t("today.now") : t("today.next")}
+                </span>
                 {nextUp.item.title}{" "}
                 <span className={nextUp.isNow ? "font-bold text-emerald-600" : "text-black/55 dark:text-white/55"}>
-                  {nextUp.text}
+                  {formatNextUp(nextUp.minutes, t)}
                 </span>
               </p>
             )}
             {streak > 0 && (
-              <p className="shrink-0 font-semibold text-orange-600 dark:text-orange-400" title="Days in a row with everything done">
+              <p className="shrink-0 font-semibold text-orange-600 dark:text-orange-400" title={t("today.streakHint")}>
                 <span aria-hidden className="today-view-flame">
                   🔥
                 </span>{" "}
-                {streak}-day streak
+                {t("today.streak", { n: streak })}
               </p>
             )}
           </div>
@@ -219,7 +260,7 @@ export function TodayViewScreen() {
 
         {(points > 0 || sorted.length > 0) && (
           <div
-            aria-label="Streak points"
+            aria-label={t("today.pointsLabel")}
             className="relative mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-400/15 px-4 py-2.5"
           >
             <div className="min-w-0">
@@ -228,19 +269,18 @@ export function TodayViewScreen() {
                 <span key={gain?.n ?? 0} className={`inline-block tabular-nums ${gain ? "today-view-points-bump" : ""}`}>
                   {shownPoints}
                 </span>{" "}
-                pts <span className="text-sm font-medium text-black/55 dark:text-white/55">· {level.name}</span>
+                {t("today.pts")}{" "}
+                <span className="text-sm font-medium text-black/55 dark:text-white/55">· {t(`rank.${level.rank}`)}</span>
               </p>
               <p className="text-sm text-black/60 dark:text-white/60">
                 {allDone
-                  ? `Streak bonus earned: +${bonusToday}`
-                  : `Finish everything today for +${bonusToday} streak bonus`}
+                  ? t("today.bonusEarned", { n: bonusToday })
+                  : t("today.bonusHint", { n: bonusToday })}
               </p>
             </div>
             {level.next !== null && (
-              <p className="shrink-0 text-right text-sm font-medium text-black/55 dark:text-white/55">
-                {level.next - points} to
-                <br />
-                next rank
+              <p className="max-w-24 shrink-0 text-right text-sm font-medium text-black/55 dark:text-white/55">
+                {t("today.toNextRank", { n: level.next - points })}
               </p>
             )}
             {gain && (
@@ -249,16 +289,28 @@ export function TodayViewScreen() {
                 className="today-view-gain rounded-full bg-emerald-600 px-3 py-1 text-sm font-bold whitespace-nowrap text-white shadow"
               >
                 +{gain.amount}
-                {gain.bonus > 0 && ` · streak bonus +${gain.bonus}`}
+                {gain.bonus > 0 && ` · ${t("today.gainBonus", { n: gain.bonus })}`}
               </span>
             )}
           </div>
         )}
 
-        {sorted.length > 0 && (
+        {plan && week.length > 0 && (
+          <TodayViewWeek
+            days={week}
+            selectedKey={viewed?.dateKey ?? plan.dateKey}
+            todayKey={plan.dateKey}
+            onSelect={selectDay}
+            onShiftWeek={shiftWeek}
+          />
+        )}
+
+        {!viewed && sorted.length > 0 && (
           <div className="mt-3">
             <div className="mb-1 flex items-center justify-between text-base text-black/60 dark:text-white/60">
-              <span>{allDone ? "Everything done 🎉" : `${doneCount} of ${sorted.length} done`}</span>
+              <span>
+                {allDone ? t("today.allDone") : t("today.progress", { done: doneCount, total: sorted.length })}
+              </span>
               <span className="flex items-center gap-3">
                 {doneCount > 0 && (
                   <button
@@ -267,7 +319,7 @@ export function TodayViewScreen() {
                     aria-pressed={prefs.hideDone}
                     className="rounded-full border border-black/15 px-3 py-0.5 text-sm font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
                   >
-                    {prefs.hideDone ? `Show done (${doneCount})` : "Hide done"}
+                    {prefs.hideDone ? t("today.showDone", { n: doneCount }) : t("today.hideDone")}
                   </button>
                 )}
                 <span className="tabular-nums">{shownPercent}%</span>
@@ -275,7 +327,7 @@ export function TodayViewScreen() {
             </div>
             <div
               role="progressbar"
-              aria-label="Today's progress"
+              aria-label={t("today.progressLabel")}
               aria-valuenow={percent}
               aria-valuemin={0}
               aria-valuemax={100}
@@ -292,11 +344,50 @@ export function TodayViewScreen() {
 
       {plan === null ? (
         <div className="flex-1" aria-busy="true" />
+      ) : viewed ? (
+        <section>
+          <div className="mb-1 flex items-center justify-between gap-3 px-3">
+            <h2 className="text-lg font-semibold">
+              {parseTodayViewDateKey(viewed.dateKey).toLocaleDateString(locale, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </h2>
+            <button
+              type="button"
+              onClick={() => {
+                setWeekOffset(0);
+                setViewed(null);
+              }}
+              className="shrink-0 rounded-full border border-black/15 px-3 py-0.5 text-sm font-semibold transition-colors active:bg-black/5 dark:border-white/20 dark:active:bg-white/10"
+            >
+              {t("today.backToToday")}
+            </button>
+          </div>
+          {viewedItems.length === 0 ? (
+            <div className="today-view-rise flex flex-col items-center gap-3 py-10 text-center">
+              <p className="text-lg text-black/55 dark:text-white/55">{t("today.emptyDay")}</p>
+              <Link
+                href={`/plan-editor?date=${viewed.dateKey}`}
+                className="rounded-full bg-foreground px-5 py-2.5 text-base font-semibold text-background"
+              >
+                {t("today.planThisDay")}
+              </Link>
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {viewedItems.map((item, i) => (
+                <TodayViewItemRow key={item.id} item={item} index={i} status={null} onToggle={toggleDone} readOnly />
+              ))}
+            </ul>
+          )}
+        </section>
       ) : sorted.length === 0 ? (
         <TodayViewEmpty />
       ) : visible.length === 0 ? (
         <p className="today-view-rise py-10 text-center text-lg text-black/55 dark:text-white/55">
-          All done and hidden. Nice work!
+          {t("today.allHidden")}
         </p>
       ) : (
         <ul className="flex flex-col gap-1">
@@ -312,13 +403,13 @@ export function TodayViewScreen() {
         </ul>
       )}
 
-      {sorted.length > 0 && !prefs.hideDone && remaining > 0 && (
+      {!viewed && sorted.length > 0 && !prefs.hideDone && remaining > 0 && (
         <p className="mt-6 px-3 text-center text-sm text-black/40 dark:text-white/40">
-          Tip: swipe an item right to complete it
+          {t("today.swipeTip")}
         </p>
       )}
 
-      {celebration && <TodayViewCelebration message={celebration} />}
+      {celebration && <TodayViewCelebration message={t(celebration)} />}
     </main>
   );
 }

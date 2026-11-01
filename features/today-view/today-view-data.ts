@@ -18,6 +18,23 @@ export function toTodayViewDateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** "YYYY-MM-DD" -> local Date at midnight. */
+export function parseTodayViewDateKey(dateKey: string): Date {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export type TodayViewWeekDay = { dateKey: string; date: Date };
+
+/** The seven days (Monday to Sunday) of the week containing `now`, shifted by `weekOffset` weeks. */
+export function getTodayViewWeek(now: Date, weekOffset: number): TodayViewWeekDay[] {
+  const sinceMonday = (now.getDay() + 6) % 7;
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - sinceMonday + weekOffset * 7 + i);
+    return { dateKey: toTodayViewDateKey(date), date };
+  });
+}
+
 export function loadTodayViewItems(dateKey: string): TodayViewItem[] {
   const raw = window.localStorage.getItem(STORAGE_PREFIX + dateKey);
   if (raw === null) return [];
@@ -82,31 +99,34 @@ export function getTodayViewStatuses(
   return statuses;
 }
 
-export function getTodayViewGreeting(now: Date): string {
+export type TodayViewGreeting = "night" | "morning" | "afternoon" | "evening";
+
+/** Which greeting fits the hour; the screen translates it. */
+export function getTodayViewGreeting(now: Date): TodayViewGreeting {
   const h = now.getHours();
-  if (h < 5) return "Good night";
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
+  if (h < 5) return "night";
+  if (h < 12) return "morning";
+  if (h < 18) return "afternoon";
+  return "evening";
 }
 
-/** One-line "what's next" summary under the date. Null when nothing timed is left. */
+/**
+ * "What's next" summary under the date. Null when nothing timed is left.
+ * `minutes` is how long until it starts (0 = happening now); the screen words it.
+ */
 export function getTodayViewNextUp(
   sortedItems: TodayViewItem[],
   statuses: Map<string, TodayViewItemStatus>,
   now: Date,
-): { item: TodayViewItem; text: string; isNow: boolean } | null {
+): { item: TodayViewItem; minutes: number; isNow: boolean } | null {
   const item = sortedItems.find((it) => {
     const s = statuses.get(it.id);
     return s === "now" || s === "next";
   });
   if (!item?.startTime) return null;
   const diff = minutesOf(item.startTime) - (now.getHours() * 60 + now.getMinutes());
-  if (diff <= 0) return { item, text: "happening now", isNow: true };
-  const h = Math.floor(diff / 60);
-  const m = diff % 60;
-  const text = h === 0 ? `in ${m} min` : m === 0 ? `in ${h} h` : `in ${h} h ${m} min`;
-  return { item, text, isNow: false };
+  if (diff <= 0) return { item, minutes: 0, isNow: true };
+  return { item, minutes: diff, isNow: false };
 }
 
 /**
@@ -170,19 +190,21 @@ export function loadTodayViewTotalPoints(): number {
 }
 
 /** A small rank that gives the points something to work towards. */
-export function getTodayViewLevel(points: number): { name: string; next: number | null } {
-  const levels = [
-    { name: "Starter", min: 0 },
-    { name: "Planner", min: 100 },
-    { name: "Achiever", min: 300 },
-    { name: "Pro", min: 700 },
-    { name: "Legend", min: 1500 },
+export type TodayViewRank = "starter" | "planner" | "achiever" | "pro" | "legend";
+
+export function getTodayViewLevel(points: number): { rank: TodayViewRank; next: number | null } {
+  const levels: { rank: TodayViewRank; min: number }[] = [
+    { rank: "starter", min: 0 },
+    { rank: "planner", min: 100 },
+    { rank: "achiever", min: 300 },
+    { rank: "pro", min: 700 },
+    { rank: "legend", min: 1500 },
   ];
   let idx = 0;
   levels.forEach((l, i) => {
     if (points >= l.min) idx = i;
   });
-  return { name: levels[idx].name, next: levels[idx + 1]?.min ?? null };
+  return { rank: levels[idx].rank, next: levels[idx + 1]?.min ?? null };
 }
 
 /* ---------- display preferences (today-view only) ---------- */
@@ -217,22 +239,17 @@ export function getTodayViewSky(now: Date): TodayViewSky {
   return { icon: "🌙", glow: "from-indigo-500/40 via-violet-500/20" };
 }
 
-const CELEBRATION_MESSAGES = [
-  "All done for today! 🎉",
-  "Clean sweep! ✨",
-  "Nailed it! 🙌",
-  "Day conquered! 🏆",
-  "Nothing left. Enjoy! 🌈",
-];
+export type TodayViewCelebrationKey = `celebration.${0 | 1 | 2 | 3 | 4}`;
 
-export function pickTodayViewCelebration(): string {
-  return CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+/** Picks one of the celebration messages (texts live in lib/i18n/messages.ts). */
+export function pickTodayViewCelebration(): TodayViewCelebrationKey {
+  return `celebration.${Math.floor(Math.random() * 5) as 0 | 1 | 2 | 3 | 4}`;
 }
 
-/** "07:00" -> "7:00 AM" in the user's locale. */
-export function formatTodayViewTime(startTime: string): string {
+/** "07:00" -> "7:00 AM" in the given locale (undefined = the phone's own). */
+export function formatTodayViewTime(startTime: string, locale?: string): string {
   const [h, m] = startTime.split(":").map(Number);
   const d = new Date();
   d.setHours(h, m, 0, 0);
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
 }

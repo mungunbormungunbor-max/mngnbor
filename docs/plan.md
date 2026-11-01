@@ -49,6 +49,14 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
   the whole day is finished. Points are stored per day (`daily-plan:today-view-points:<date>`), so un-ticking
   takes them back. Shows total points, a rank (Starter / Planner / Achiever / Pro / Legend) and a floating "+N".
 
+* Week tabs (owner request): a Mon–Sun strip under the header with ‹ › arrows for other weeks. A dot marks
+  days with items (green when all done). Tap a day to see only that day's items (view-only); "Back to today"
+  returns. Progress, points and streak always describe today. Full month view stays in `plan-calendar`.
+* Bilingual (owner request, whole app): Mongolian / English, chosen from a menu (☰) in the `today-view`
+  header and on the login/signup pages. Shared code lives in `lib/i18n/` (all text in `messages.ts`) and
+  `components/app-menu.tsx`; the choice is saved in the `daily-plan-lang` cookie. New features must add
+  their text to `messages.ts` in both languages. `app-settings` can later reuse the same language option.
+
 ### **`plan-editor`**
 
 * Form to add a plan item: title, optional time, optional note.  
