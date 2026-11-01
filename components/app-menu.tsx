@@ -7,6 +7,7 @@ import { ControlsPanel } from "@/components/controls-panel";
 import { ThemePicker } from "@/components/theme-picker";
 import { NotificationsPanel } from "@/features/notifications";
 import { useI18n } from "@/lib/i18n/provider";
+import { getActiveUser } from "@/lib/user-scope/user-scope";
 
 const NAV = [
   { href: "/today-view", icon: "☀️", label: "menu.today" },
@@ -18,6 +19,8 @@ const NAV = [
 /** Small hamburger menu with the language options (Монгол / English). */
 export function AppMenu({ className = "" }: { className?: string }) {
   const { lang, setLang, t } = useI18n();
+  // Set from the server session while the page rendered (see UserScopeProvider); null = signed out.
+  const signedIn = getActiveUser() !== null;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +60,27 @@ export function AppMenu({ className = "" }: { className?: string }) {
           role="menu"
           className="absolute right-0 z-40 mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto rounded-2xl border border-black/10 bg-background p-1 shadow-lg dark:border-white/15"
         >
-          {NAV.map((item) => (
+          {!signedIn && (
+            <div className="grid grid-cols-2 gap-2 p-2">
+              <Link
+                href="/login"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="rounded-xl bg-brand-600 px-3 py-3 text-center text-base font-semibold text-white active:opacity-80"
+              >
+                {t("auth.login.button")}
+              </Link>
+              <Link
+                href="/signup"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="rounded-xl border border-brand-600 px-3 py-3 text-center text-base font-semibold text-brand-700 active:bg-brand-600/10 dark:text-brand-300"
+              >
+                {t("auth.signup.button")}
+              </Link>
+            </div>
+          )}
+          {NAV.filter((item) => signedIn || item.href !== "/my-account").map((item) => (
             <Link
               key={item.href}
               href={item.href}

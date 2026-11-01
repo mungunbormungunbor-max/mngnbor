@@ -78,6 +78,20 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 > Stage 1 note: until Supabase is wired in Stage 3, features share mock data through localStorage key
 > `daily-plan:plan-items:YYYY-MM-DD` (named after the table, not a feature).
 
+### **Login, signup and forgot password** (owner request)
+
+* `/login` and `/signup` as before; both are also in the ☰ menu while signed out (Log in / Sign up buttons), and
+  "My account" replaces them once signed in. The login page has a **Forgot password?** link.
+* `/forgot-password`: enter your email, Supabase emails a reset link (the page always says "if an account exists...",
+  so it never reveals which emails are registered). The link opens `/reset-password`, where you choose a new password
+  (8+ characters, typed twice) and are taken to the app. Expired or reused links show "Request a new link".
+* The proxy treats `/forgot-password` and `/reset-password` as public pages; `/reset-password` stays reachable after the
+  recovery link signs you in.
+* **Supabase setting needed:** Authentication -> URL Configuration -> Redirect URLs must include
+  `https://mngnbor.vercel.app/reset-password` (and `http://localhost:3000/reset-password` for local testing),
+  or the emailed link will be rejected. The default Supabase email sender is limited to a few emails per hour;
+  use custom SMTP before launch.
+
 ### **`my-account`** (owner request, first Stage 2/3 feature)
 
 * `/my-account` (open it from the ☰ menu): your **unique user ID** (the Supabase Auth UUID, with a Copy button),

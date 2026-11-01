@@ -10,6 +10,9 @@
 let activeUserId: string | null = null;
 
 export function setActiveUser(userId: string | null): void {
+  // Browser only. On the server this module is shared by every request, so storing a user there
+  // could mix up visitors; the server never reads it (localStorage only exists in the browser).
+  if (typeof window === "undefined") return;
   activeUserId = userId;
 }
 

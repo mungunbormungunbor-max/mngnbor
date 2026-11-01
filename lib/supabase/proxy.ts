@@ -2,7 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, supabaseKey, supabaseUrl } from "./env";
 
-const PUBLIC_PATHS = ["/login", "/signup"];
+/** Pages anyone can open without signing in. */
+const PUBLIC_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password"];
+
+/**
+ * Public pages a signed-in user is sent away from. /reset-password is not one of them: the emailed
+ * recovery link signs the user in, and they still need to stay on that page to choose the new password.
+ */
+const SIGNED_OUT_ONLY_PATHS = ["/login", "/signup", "/forgot-password"];
+
+const matchesPath = (pathname: string, paths: string[]) =>
+  paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
 /** Refreshes the auth session cookie and redirects signed-out users to /login. */
 export async function updateSession(request: NextRequest) {
@@ -33,7 +43,7 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const isPublic = matchesPath(pathname, PUBLIC_PATHS);
 
   if (!signedIn && !isPublic) {
     const url = request.nextUrl.clone();
@@ -41,7 +51,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (signedIn && isPublic) {
+  if (signedIn && matchesPath(pathname, SIGNED_OUT_ONLY_PATHS)) {
     const url = request.nextUrl.clone();
     url.pathname = "/today-view";
     return NextResponse.redirect(url);

@@ -214,6 +214,21 @@ const en = {
   "acct.deleting": "Deleting…",
   "acct.deleteError": "Couldn't delete the account. Try again.",
 
+  "auth.forgotLink": "Forgot password?",
+  "auth.forgot.title": "Reset your password",
+  "auth.forgot.text": "Enter your email and we'll send you a link to choose a new password.",
+  "auth.forgot.button": "Send reset link",
+  "auth.forgot.sent":
+    "If an account exists for that email, a reset link is on its way. Check your inbox and spam folder.",
+  "auth.forgot.back": "Back to log in",
+  "auth.reset.title": "Choose a new password",
+  "auth.reset.button": "Save new password",
+  "auth.reset.checking": "Checking your link…",
+  "auth.reset.invalid": "This reset link is invalid or has expired. Request a new one.",
+  "auth.reset.requestNew": "Request a new link",
+  "auth.reset.done": "Password updated. Taking you to the app…",
+  "auth.reset.error": "Couldn't update the password. Try again.",
+
   "ctrl.title": "Controls",
   "ctrl.textSize": "Text size",
   "ctrl.small": "Small",
@@ -445,6 +460,21 @@ const mn: Record<MessageKey, string> = {
   "acct.deleteButton": "Миний бүртгэлийг устгах",
   "acct.deleting": "Устгаж байна…",
   "acct.deleteError": "Бүртгэлийг устгаж чадсангүй. Дахин оролдоно уу.",
+
+  "auth.forgotLink": "Нууц үгээ мартсан уу?",
+  "auth.forgot.title": "Нууц үг сэргээх",
+  "auth.forgot.text": "И-мэйлээ оруулбал шинэ нууц үг сонгох холбоос илгээнэ.",
+  "auth.forgot.button": "Сэргээх холбоос илгээх",
+  "auth.forgot.sent":
+    "Энэ и-мэйлээр бүртгэл байвал сэргээх холбоос илгээгдлээ. Ирсэн болон спам хавтсаа шалгана уу.",
+  "auth.forgot.back": "Нэвтрэх рүү буцах",
+  "auth.reset.title": "Шинэ нууц үг сонгох",
+  "auth.reset.button": "Шинэ нууц үгийг хадгалах",
+  "auth.reset.checking": "Холбоосыг шалгаж байна…",
+  "auth.reset.invalid": "Энэ холбоос хүчингүй эсвэл хугацаа нь дууссан. Шинээр хүсэлт илгээнэ үү.",
+  "auth.reset.requestNew": "Шинэ холбоос авах",
+  "auth.reset.done": "Нууц үг шинэчлэгдлээ. Апп руу шилжиж байна…",
+  "auth.reset.error": "Нууц үг шинэчилж чадсангүй. Дахин оролдоно уу.",
 
   "ctrl.title": "Удирдлага",
   "ctrl.textSize": "Үсгийн хэмжээ",

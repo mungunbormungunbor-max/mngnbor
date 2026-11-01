@@ -100,6 +100,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
             className="rounded-lg border border-black/15 bg-transparent px-3 py-3 text-base dark:border-white/20"
           />
         </label>
+        {mode === "login" && (
+          <Link href="/forgot-password" className="-mt-2 self-end text-sm font-semibold underline">
+            {t("auth.forgotLink")}
+          </Link>
+        )}
         {error && (
           <p role="alert" className="text-sm text-red-600">
             {typeof error === "string" ? t(error) : error.text}
