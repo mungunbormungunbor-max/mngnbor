@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import { useRef, useState, type FormEvent } from "react";
 import { useI18n } from "@/lib/i18n/provider";
@@ -58,7 +59,7 @@ export function MoneyTrackerForm({ entry, defaultDate, submitLabel, onSubmit, on
     const value = parseMoneyTrackerAmount(amount);
     if (value === null) {
       setInvalid(true);
-      navigator.vibrate?.([30, 40, 30]);
+      haptic([30, 40, 30]);
       amountRef.current?.focus();
       return;
     }

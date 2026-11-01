@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -136,7 +137,7 @@ export function TodayViewScreen() {
     }
     if (finishedDay) {
       setCelebration(pickTodayViewCelebration());
-      navigator.vibrate?.([20, 60, 20]);
+      haptic([20, 60, 20]);
     }
   }
 

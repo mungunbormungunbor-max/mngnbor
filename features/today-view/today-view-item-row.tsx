@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { useI18n } from "@/lib/i18n/provider";
@@ -41,7 +42,7 @@ export function TodayViewItemRow({ item, status, index, onToggle, readOnly = fal
   function toggle() {
     if (!item.isDone) {
       setPopping(true);
-      navigator.vibrate?.(12);
+      haptic(12);
     }
     onToggle(item.id);
   }

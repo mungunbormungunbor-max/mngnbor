@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -90,7 +91,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
       isDone: false,
       sortOrder: nextPlanEditorSortOrder(plan.items),
     };
-    navigator.vibrate?.(10);
+    haptic(10);
     commit([...plan.items, item], item.id);
   }
 
@@ -128,7 +129,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
       isDone: false,
       sortOrder: nextPlanEditorSortOrder(plan.items),
     };
-    navigator.vibrate?.(10);
+    haptic(10);
     commit([...plan.items, copy], copy.id);
   }
 
@@ -136,7 +137,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     if (!plan) return;
     const item = plan.items.find((it) => it.id === id);
     if (!item) return;
-    navigator.vibrate?.(15);
+    haptic(15);
     commit(plan.items.filter((it) => it.id !== id));
     if (editingId === id) setEditingId(null);
     offerUndo(t("editor.deleted", { title: item.title }), { kind: "delete", item });
@@ -155,7 +156,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
       sortOrder: nextPlanEditorSortOrder(tomorrowItems),
     };
     savePlanEditorItems(tomorrowKey, [...tomorrowItems, copy]);
-    navigator.vibrate?.(15);
+    haptic(15);
     commit(plan.items.filter((it) => it.id !== id));
     if (editingId === id) setEditingId(null);
     offerUndo(t("editor.movedTomorrow", { title: item.title }), { kind: "tomorrow", item, tomorrowKey, copyId: copy.id });
@@ -165,7 +166,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     if (!plan) return;
     const done = plan.items.filter((it) => it.isDone);
     if (done.length === 0) return;
-    navigator.vibrate?.(15);
+    haptic(15);
     commit(plan.items.filter((it) => !it.isDone));
     offerUndo(t(done.length === 1 ? "editor.clearedOne" : "editor.clearedMany", { n: done.length }), {
       kind: "clear",
@@ -192,7 +193,7 @@ export function PlanEditorScreen({ dateParam }: { dateParam: string | null }) {
     if (!plan || carry.length === 0) return;
     let order = nextPlanEditorSortOrder(plan.items);
     const copies = carry.map((it) => ({ ...it, id: newPlanEditorId(), isDone: false, sortOrder: order++ }));
-    navigator.vibrate?.(10);
+    haptic(10);
     dismissPlanEditorCarry(plan.dateKey);
     setCarry([]);
     commit([...plan.items, ...copies], copies[0].id);

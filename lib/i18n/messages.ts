@@ -214,6 +214,14 @@ const en = {
   "acct.deleting": "Deleting…",
   "acct.deleteError": "Couldn't delete the account. Try again.",
 
+  "ctrl.title": "Controls",
+  "ctrl.textSize": "Text size",
+  "ctrl.small": "Small",
+  "ctrl.default": "Default",
+  "ctrl.large": "Large",
+  "ctrl.haptics": "Vibration feedback",
+  "ctrl.motion": "Animations",
+
   "theme.title": "Appearance",
   "theme.light": "Light",
   "theme.dark": "Dark",
@@ -437,6 +445,14 @@ const mn: Record<MessageKey, string> = {
   "acct.deleteButton": "Миний бүртгэлийг устгах",
   "acct.deleting": "Устгаж байна…",
   "acct.deleteError": "Бүртгэлийг устгаж чадсангүй. Дахин оролдоно уу.",
+
+  "ctrl.title": "Удирдлага",
+  "ctrl.textSize": "Үсгийн хэмжээ",
+  "ctrl.small": "Жижиг",
+  "ctrl.default": "Энгийн",
+  "ctrl.large": "Том",
+  "ctrl.haptics": "Чичиргээт хариу",
+  "ctrl.motion": "Хөдөлгөөнт эффект",
 
   "theme.title": "Харагдац",
   "theme.light": "Цайвар",

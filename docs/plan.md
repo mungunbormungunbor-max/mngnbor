@@ -106,6 +106,13 @@ Login and signup pages. Already exists. Not modified during Stage 1\.
 * Stage 1 data: localStorage `daily-plan:money-entries` (named after the future `money_entries` table) and
   `daily-plan:money-prefs`. Fields: id, kind, amount, category, note, date, createdAt.
 
+### **Controls** (owner request, whole app)
+
+* A "Controls" section in the ☰ menu: **text size** (Small 90% / Default / Large 115%, scales the whole app),
+  **vibration feedback** on/off (every buzz goes through `haptic()`), and **animations** on/off (stops confetti,
+  slides and fades). Saved on the device (`daily-plan:controls`), applied before first paint. Code: `lib/controls/`,
+  `components/controls-panel.tsx`.
+
 ### **Appearance** (owner request, whole app)
 
 * Light / Dark / System switch in the ☰ menu (default: System, follows the phone). The choice is saved in

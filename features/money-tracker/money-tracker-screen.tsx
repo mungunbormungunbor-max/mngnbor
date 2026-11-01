@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -76,7 +77,7 @@ export function MoneyTrackerScreen() {
 
   function addEntry(input: MoneyTrackerInput) {
     if (!entries) return;
-    navigator.vibrate?.(10);
+    haptic(10);
     commit([...entries, { ...input, id: newMoneyTrackerId(), createdAt: Date.now() }]);
     // Jump to the month the record landed in, so it is never added "out of sight".
     if (period === "month") setMonthKey(toMoneyTrackerMonthKey(input.date));
@@ -93,7 +94,7 @@ export function MoneyTrackerScreen() {
     if (!entries) return;
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
-    navigator.vibrate?.(15);
+    haptic(15);
     commit(entries.filter((e) => e.id !== id));
     setEditingId(null);
     setUndo((u) => ({ entry, n: (u?.n ?? 0) + 1 }));

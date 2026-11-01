@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NotificationsScheduler } from "@/features/notifications";
+import { CONTROLS_INIT_SCRIPT } from "@/lib/controls/controls";
+import { ControlsSync } from "@/lib/controls/controls-sync";
 import { getServerUserId } from "@/lib/supabase/user";
 import { UserScopeProvider } from "@/lib/user-scope/user-scope-provider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/theme";
@@ -45,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT + CONTROLS_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
         <UserScopeProvider userId={userId}>
@@ -53,6 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {children}
             <NotificationsScheduler />
             <ThemeSync />
+            <ControlsSync />
           </I18nProvider>
         </UserScopeProvider>
       </body>

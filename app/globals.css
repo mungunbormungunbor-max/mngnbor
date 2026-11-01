@@ -72,3 +72,25 @@ body {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
 }
+
+/*
+ * Controls from the ☰ menu (see lib/controls). Text size scales every rem-based size in the app.
+ * Animations "off" stops all motion, the same way the phone's own reduce-motion setting does.
+ */
+html[data-text-size="small"] {
+  font-size: 90%;
+}
+
+html[data-text-size="large"] {
+  font-size: 115%;
+}
+
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

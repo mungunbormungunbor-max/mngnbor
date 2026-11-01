@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LANGUAGES, LANGUAGE_NAMES } from "@/lib/i18n/messages";
+import { ControlsPanel } from "@/components/controls-panel";
 import { ThemePicker } from "@/components/theme-picker";
 import { NotificationsPanel } from "@/features/notifications";
 import { useI18n } from "@/lib/i18n/provider";
@@ -92,6 +93,7 @@ export function AppMenu({ className = "" }: { className?: string }) {
             </button>
           ))}
           <ThemePicker />
+          <ControlsPanel />
           <NotificationsPanel />
         </div>
       )}

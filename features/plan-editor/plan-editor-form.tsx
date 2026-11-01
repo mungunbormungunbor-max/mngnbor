@@ -1,4 +1,5 @@
 "use client";
+import { haptic } from "@/lib/controls/controls";
 
 import { useRef, useState, type FormEvent } from "react";
 import { useI18n } from "@/lib/i18n/provider";
@@ -67,7 +68,7 @@ export function PlanEditorForm({
     e.preventDefault();
     if (!draft.title.trim()) {
       setShaking(true);
-      navigator.vibrate?.([30, 40, 30]);
+      haptic([30, 40, 30]);
       titleRef.current?.focus();
       return;
     }
